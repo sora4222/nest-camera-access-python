@@ -17,6 +17,12 @@ onepassword = [
 images = [
     "pillow>=12.3.0",
 ]
+notebooks = [
+    "jupyter>=1.1.1",
+    "matplotlib>=3.11.2",
+    "opencv-python-headless>=5.0.0.93",
+    "pillow>=12.3.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.8.0,<0.12"]
@@ -30,8 +36,8 @@ markers = [
 ]
 
 [tool.ruff]
-# Issue notes, not code.
-extend-exclude = [".scratch"]
+# Issue notes and agent worktrees, not package code.
+extend-exclude = [".scratch", ".claude"]
 
 [tool.ruff.lint]
 select = ["D", "E", "F", "UP", "RUF", "ASYNC"]
@@ -46,3 +52,7 @@ dev = [
     "ruff>=0.16.10",
     "ty>=0.0.85",
 ]
+
+[tool.ty.src]
+# Agent worktrees hold other checkouts of this repo.
+exclude = [".claude"]
