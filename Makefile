@@ -1,4 +1,4 @@
-.PHONY: test test_real_cameras check
+.PHONY: test test_real_cameras check build
 
 # Unit tests with fake Google replies. Runs anywhere.
 test:
@@ -14,3 +14,8 @@ check:
 	uv run ruff format --check .
 	uv run ruff check .
 	uv run ty check
+
+# Build the wheel and source package into dist/ for other projects to install.
+build:
+	rm -rf dist
+	uv build

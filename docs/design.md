@@ -71,6 +71,7 @@ PyTorch and TensorFlow are in no extra; the notebook that uses them says how to 
 - `make test`: unit tests with fake Google replies. Runs anywhere and in CI.
 - `make test_real_cameras`: tests marked `real_camera`, skipped unless a Token and Credentials exist. Never run in CI.
 - `make check`: `ruff format --check`, `ruff check`, `ty check`.
+- `make build`: builds the wheel and source package into `dist/`. CI runs it too.
 
 ## Build order
 

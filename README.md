@@ -8,4 +8,4 @@ The package handles Google login, the Nest WebRTC live stream, and turning video
 - [Glossary](GLOSSARY.md): the words used in code and docs
 - [Decisions](docs/adr/): why some choices were made
 
-Development: `make check` and `make test`.
+Development: `make check`, `make test`, and `make build` (puts the wheel in `dist/` for other projects to install).

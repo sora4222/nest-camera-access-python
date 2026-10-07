@@ -17,3 +17,4 @@ jobs:
       - run: uv sync --locked
       - run: make check
       - run: make test
+      - run: make build
