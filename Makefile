@@ -20,7 +20,7 @@ login:
 check:
 	uv run ruff format --check .
 	uv run ruff check .
-	uv run --extra onepassword --extra images ty check
+	uv run --extra onepassword --extra notebooks ty check
 
 # Build the wheel and source package into dist/ for other projects to install.
 build:
