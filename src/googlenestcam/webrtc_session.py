@@ -13,8 +13,9 @@ from typing import Any, cast
 
 from aiortc import RTCPeerConnection, RTCSessionDescription
 from aiortc.mediastreams import MediaStreamError, MediaStreamTrack
-from av import VideoFrame
+from av import AudioFrame, VideoFrame
 
+from googlenestcam.audio_chunk import AudioChunk, Samples
 from googlenestcam.errors import GoogleApiError, StreamError
 from googlenestcam.frame import Frame, Image
 from googlenestcam.frame_size import Size, target_size
@@ -39,8 +40,18 @@ def _rgb(frame: VideoFrame, size: Size | None) -> Image:
     return cast(Image, frame.to_ndarray(width=width, height=height, format="rgb24"))
 
 
+def _samples(frame: AudioFrame) -> Samples:
+    """Return the sound as samples x channels; aiortc decodes Opus to int16."""
+    array = frame.to_ndarray()
+    if frame.format.is_planar:
+        array = array.T
+    else:
+        array = array.reshape(-1, len(frame.layout.channels))
+    return cast(Samples, array.astype("int16", copy=False))
+
+
 class WebRtcSession:
-    """A live WebRTC session that hands each decoded Frame to a callback."""
+    """A live WebRTC session that hands each Frame and Audio chunk to callbacks."""
 
     def __init__(
         self,
@@ -48,6 +59,7 @@ class WebRtcSession:
         on_frame: Callable[[Frame], None],
         on_error: Callable[[Exception], None],
         size: Size | None = None,
+        on_audio: Callable[[AudioChunk], None] | None = None,
     ) -> None:
         """Prepare a session.
 
@@ -57,9 +69,11 @@ class WebRtcSession:
             on_error: Called once the session stops working.
             size: Resize each Frame to this height or ``(width, height)``;
                 ``None`` keeps it.
+            on_audio: Called with each Audio chunk; ``None`` throws Audio away.
         """
         self._run_command = run_command
         self._on_frame = on_frame
+        self._on_audio = on_audio
         self._on_error = on_error
         self._size = size
         self._connection: RTCPeerConnection | None = None
@@ -129,6 +143,8 @@ class WebRtcSession:
     def _on_track(self, track: MediaStreamTrack) -> None:
         if track.kind == "video":
             self._start_task(self._read_video(track))
+        elif self._on_audio is not None:
+            self._start_task(self._read_audio(track, self._on_audio))
         else:
             self._start_task(self._discard(track))
 
@@ -149,6 +165,16 @@ class WebRtcSession:
             self._fail(StreamError("The Camera stopped sending video"))
         except Exception as error:
             self._fail(StreamError(f"Could not decode the video: {error}"))
+
+    async def _read_audio(
+        self, track: MediaStreamTrack, on_audio: Callable[[AudioChunk], None]
+    ) -> None:
+        with suppress(MediaStreamError):
+            while True:
+                frame = await track.recv()
+                received = datetime.now(UTC)
+                if isinstance(frame, AudioFrame):
+                    on_audio(AudioChunk(_samples(frame), received))
 
     async def _discard(self, track: MediaStreamTrack) -> None:
         with suppress(MediaStreamError):
