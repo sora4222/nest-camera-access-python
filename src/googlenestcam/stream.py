@@ -9,7 +9,8 @@ from googlenestcam import background_loop
 from googlenestcam.frame import Frame
 from googlenestcam.frame_queue import FrameQueue, OnFull
 from googlenestcam.latest_frame import LatestFrame
-from googlenestcam.webrtc_session import RunCommand, WebRtcSession
+from googlenestcam.reconnect import ReconnectingSession
+from googlenestcam.webrtc_session import RunCommand
 
 type FrameMode = Literal["latest", "all"]
 
@@ -21,6 +22,7 @@ class _StreamParts:
         frames: FrameMode = "latest",
         queue_size: int = 100,
         on_full: OnFull = "raise",
+        retries: int = 3,
     ) -> None:
         if frames == "latest":
             self._frames: LatestFrame | FrameQueue = LatestFrame()
@@ -28,8 +30,8 @@ class _StreamParts:
             self._frames = FrameQueue(queue_size, on_full)
         else:
             raise ValueError('frames must be "latest" or "all"')
-        self._session = WebRtcSession(
-            run_command, on_frame=self._frames.put, on_error=self._frames.fail
+        self._session = ReconnectingSession(
+            run_command, self._frames.put, self._frames.fail, retries
         )
 
     @property

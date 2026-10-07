@@ -4,12 +4,12 @@
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** ready-for-human (PR open)
 
-- [ ] `retries` has a sensible default and can be set.
-- [ ] After a drop, Frames start again with no change to the developer's loop.
-- [ ] A good reconnect resets the try count.
-- [ ] After N failed tries, a clear error is raised from `frames()`.
-- [ ] The old session is stopped at Google when a new one starts.
-- [ ] Unit tests drop the fake peer and check both paths.
-- [ ] `make check` and `make test` pass.
+- [x] `retries` has a sensible default and can be set.
+- [x] After a drop, Frames start again with no change to the developer's loop.
+- [x] A good reconnect resets the try count.
+- [x] After N failed tries, a clear error is raised from `frames()`.
+- [x] The old session is stopped at Google when a new one starts.
+- [x] Unit tests drop the fake peer and check both paths.
+- [x] `make check` and `make test` pass.
