@@ -10,14 +10,14 @@ from scripts.check_pr_title import title_problem
     [
         "feat: audio from streams",
         "fix(stream): reconnect after a drop",
-        "refactor: use one deque buffer for Latest and Every-frame mode",
+        "refactor: use one deque buffer for latest and every-frame mode",
         "ci: check pull request titles",
         "feat!: rename list_cameras",
         "chore: bump numpy to 2.5",
     ],
 )
 def test_good_titles_pass(title: str) -> None:
-    """Conventional Commit titles that start lowercase have no problem."""
+    """Lowercase Conventional Commit titles have no problem."""
     assert title_problem(title) is None
 
 
@@ -33,6 +33,8 @@ def test_good_titles_pass(title: str) -> None:
         "feature: audio from streams",
         "feat: audio from streams.",
         "feat(Stream): reconnect",
+        "feat: add the OpenCV notebook",
+        "refactor: use one buffer for Latest mode",
     ],
 )
 def test_bad_titles_fail(title: str) -> None:

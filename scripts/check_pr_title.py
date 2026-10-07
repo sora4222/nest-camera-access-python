@@ -1,8 +1,7 @@
-"""Check that a pull request title is a lowercase Conventional Commit.
+"""Check that a pull request title is an all-lowercase Conventional Commit.
 
 The title becomes the squash merge commit, so it must read like one:
-``type(optional-scope)!: subject``, with a lowercase type and a subject that
-starts lowercase. Names later in the subject (``OpenCV``) are fine.
+``type(optional-scope)!: subject``, with no capital letters anywhere.
 
 Usage: ``uv run scripts/check_pr_title.py "feat: audio from streams"``.
 """
@@ -36,9 +35,9 @@ def title_problem(title: str) -> str | None:
         return "Title must look like `feat: subject` or `fix(scope): subject`."
     if match["type"] not in TYPES:
         return f"Type `{match['type']}` is not one of: {', '.join(TYPES)}."
+    if title != title.lower():
+        return "Title must have no capital letters."
     subject = match["subject"]
-    if not subject[0].islower() and not subject[0].isdigit():
-        return "Subject must start with a lowercase letter."
     if subject.endswith("."):
         return "Subject must not end with a full stop."
     return None
