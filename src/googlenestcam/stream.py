@@ -1,4 +1,4 @@
-"""A live Stream of Frames from one Camera."""
+"""A live Stream of Frames and Audio from one Camera."""
 
 import asyncio
 from collections.abc import AsyncIterator, Iterator
@@ -6,6 +6,8 @@ from types import TracebackType
 from typing import Literal, Self
 
 from googlenestcam import background_loop
+from googlenestcam.audio_buffer import AudioBuffer
+from googlenestcam.audio_chunk import AudioChunk
 from googlenestcam.frame import Frame
 from googlenestcam.frame_buffer import FrameBuffer, OnFull
 from googlenestcam.frame_size import Size
@@ -24,6 +26,7 @@ class _StreamParts:
         on_full: OnFull = "raise",
         retries: int = 3,
         size: Size | None = None,
+        audio: bool = True,
     ) -> None:
         if frames == "latest":
             self._frames = FrameBuffer.latest()
@@ -31,9 +34,30 @@ class _StreamParts:
             self._frames = FrameBuffer(queue_size, on_full)
         else:
             raise ValueError('frames must be "latest" or "all"')
+        self._audio = AudioBuffer() if audio else None
         self._session = ReconnectingSession(
-            run_command, self._frames.put, self._frames.fail, retries, size
+            run_command,
+            self._frames.put,
+            self._fail,
+            retries,
+            size,
+            self._audio.put if self._audio else None,
         )
+
+    def _fail(self, error: Exception) -> None:
+        self._frames.fail(error)
+        if self._audio is not None:
+            self._audio.fail(error)
+
+    def _close_readers(self) -> None:
+        self._frames.close()
+        if self._audio is not None:
+            self._audio.close()
+
+    def _audio_buffer(self) -> AudioBuffer:
+        if self._audio is None:
+            raise ValueError("Audio is off for this Stream (audio=False)")
+        return self._audio
 
     @property
     def dropped(self) -> int:
@@ -62,8 +86,8 @@ class Stream(_StreamParts):
         exc: BaseException | None,
         traceback: TracebackType | None,
     ) -> None:
-        """Stop the Stream at Google and end ``frames()``."""
-        self._frames.close()
+        """Stop the Stream at Google and end ``frames()`` and ``audio()``."""
+        self._close_readers()
         background_loop.run(self._session.close())
 
     def frames(self) -> Iterator[Frame]:
@@ -74,6 +98,19 @@ class Stream(_StreamParts):
         """
         while (frame := self._frames.get()) is not None:
             yield frame
+
+    def audio(self) -> Iterator[AudioChunk]:
+        """Yield Audio chunks in order. Can be read in another thread than ``frames()``.
+
+        Only the last few seconds of unread Audio are kept.
+
+        Raises:
+            ValueError: If the Stream was opened with ``audio=False``.
+            StreamError: If the Stream stops working.
+        """
+        buffer = self._audio_buffer()
+        while (chunk := buffer.get()) is not None:
+            yield chunk
 
 
 class AsyncStream(_StreamParts):
@@ -94,8 +131,8 @@ class AsyncStream(_StreamParts):
         exc: BaseException | None,
         traceback: TracebackType | None,
     ) -> None:
-        """Stop the Stream at Google and end ``frames()``."""
-        self._frames.close()
+        """Stop the Stream at Google and end ``frames()`` and ``audio()``."""
+        self._close_readers()
         await background_loop.run_async(self._session.close())
 
     async def frames(self) -> AsyncIterator[Frame]:
@@ -106,3 +143,9 @@ class AsyncStream(_StreamParts):
         """
         while (frame := await asyncio.to_thread(self._frames.get)) is not None:
             yield frame
+
+    async def audio(self) -> AsyncIterator[AudioChunk]:
+        """Async version of ``Stream.audio``."""
+        buffer = self._audio_buffer()
+        while (chunk := await asyncio.to_thread(buffer.get)) is not None:
+            yield chunk

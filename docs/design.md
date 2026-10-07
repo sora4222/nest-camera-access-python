@@ -18,10 +18,11 @@ frame.to_pil()  # Pillow image; needs googlenestcam[images]
 frame.to_jpeg(quality=85)  # JPEG bytes; needs googlenestcam[images]
 
 with cam.stream() as s:  # Latest mode, Audio on
+    threading.Thread(target=lambda: [listen(c.samples) for c in s.audio()]).start()
     for frame in s.frames():  # loops until you break or leave the block
         ...
-# Audio: read s.audio() in another thread at the same time;
-# each chunk has .samples (NumPy, 48 kHz) and .time.
+# Each Audio chunk has .samples (NumPy int16, samples x channels, 48 kHz)
+# and .time on the same clock as frame.time.
 
 with cam.stream(frames="all", audio=False) as s:  # Every-frame mode
     ...
@@ -55,6 +56,12 @@ Setup steps: [login.md](login.md).
 - **Frame size**: `cam.stream(size=720)` (height; width keeps the shape) or `size=(640, 360)` resizes every Frame before you get it, so later steps run faster. `snapshot()` takes `size` too. Google's API has no way to ask a Camera for a smaller video, so the package resizes. Off by default. See [the spec](../.scratch/frame-size/spec.md).
 - When the connection drops, the Stream starts a new session by itself, up to `retries` times in a row (3 by default, 1 second apart). The count resets once a Frame arrives. After the last failed try, `frames()` raises `StreamError`.
 - Only Cameras that stream over WebRTC are supported. Older RTSP cameras are not.
+
+## Audio
+
+- Audio is on by default. `s.audio()` gives Audio chunks; read it in its own thread (or task) next to `s.frames()`.
+- Only the last 5 seconds of unread Audio are kept, so leaving Audio on never fills memory.
+- `cam.stream(audio=False)` throws the sound away and saves CPU.
 
 ## Snapshots
 

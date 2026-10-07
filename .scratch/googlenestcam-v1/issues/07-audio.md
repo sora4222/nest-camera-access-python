@@ -4,13 +4,13 @@
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** ready-for-human (PR open; real Camera test not yet run)
 
-- [ ] `cam.stream()` has Audio on; `audio=False` turns it off and Audio is not decoded.
-- [ ] Chunks have `.samples` at 48 kHz and `.time` on the same clock as `Frame.time`.
-- [ ] `frames()` and `audio()` work together from two threads.
-- [ ] Unread Audio is bounded; oldest chunks are dropped.
-- [ ] `stream_async()` has the same Audio.
-- [ ] Design doc shows reading Frames and Audio in two threads.
-- [ ] Unit tests with the fake-Google kit sending made-up sound; one `real_camera` test.
-- [ ] `make check` and `make test` pass.
+- [x] `cam.stream()` has Audio on; `audio=False` turns it off and Audio is not decoded.
+- [x] Chunks have `.samples` at 48 kHz and `.time` on the same clock as `Frame.time`.
+- [x] `frames()` and `audio()` work together from two threads.
+- [x] Unread Audio is bounded; oldest chunks are dropped.
+- [x] `stream_async()` has the same Audio.
+- [x] Design doc shows reading Frames and Audio in two threads.
+- [x] Unit tests with the fake-Google kit sending made-up sound; `real_camera` test written but not yet run.
+- [x] `make check` and `make test` pass.

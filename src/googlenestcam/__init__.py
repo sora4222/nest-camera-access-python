@@ -2,6 +2,7 @@
 
 import logging
 
+from googlenestcam.audio_chunk import AudioChunk
 from googlenestcam.camera import Camera
 from googlenestcam.credentials import Credentials, load_credentials
 from googlenestcam.default_nest import (
@@ -33,6 +34,7 @@ logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 __all__ = [
     "AsyncStream",
+    "AudioChunk",
     "Camera",
     "CameraNotFoundError",
     "Credentials",

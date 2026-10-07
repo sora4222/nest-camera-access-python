@@ -96,6 +96,7 @@ class Camera:
         on_full: OnFull = "raise",
         retries: int = 3,
         size: Size | None = None,
+        audio: bool = True,
     ) -> Stream:
         """Open a live Stream; use it in a ``with`` block.
 
@@ -121,12 +122,16 @@ class Camera:
                 ``(640, 360)`` gives exactly that width and height. Google
                 cannot send a smaller video, so this is done here. ``None``
                 keeps the Camera's size.
+            audio: Read sound with ``stream.audio()``. ``False`` throws the
+                sound away and saves CPU.
 
         Raises:
             ValueError: If ``size`` is not a whole number, or two, of at least 1.
         """
         size = check_size(size)
-        return Stream(self._run_command(), frames, queue_size, on_full, retries, size)
+        return Stream(
+            self._run_command(), frames, queue_size, on_full, retries, size, audio
+        )
 
     def stream_async(
         self,
@@ -136,11 +141,12 @@ class Camera:
         on_full: OnFull = "raise",
         retries: int = 3,
         size: Size | None = None,
+        audio: bool = True,
     ) -> AsyncStream:
         """Async version of ``stream``; use it in an ``async with`` block."""
         size = check_size(size)
         return AsyncStream(
-            self._run_command(), frames, queue_size, on_full, retries, size
+            self._run_command(), frames, queue_size, on_full, retries, size, audio
         )
 
     def _run_command(self) -> RunCommand:

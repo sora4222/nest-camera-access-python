@@ -45,3 +45,12 @@ def test_snapshot_from_a_real_camera(nest) -> None:
     """A Snapshot gives one Frame from the first Camera."""
     frame = nest.list_cameras()[0].snapshot()
     assert frame.image.ndim == 3
+
+
+def test_audio_from_a_real_camera(nest) -> None:
+    """A few Audio chunks arrive from the first Camera."""
+    camera = nest.list_cameras()[0]
+    with camera.stream() as stream:
+        chunks = [chunk for chunk, _ in zip(stream.audio(), range(3), strict=False)]
+    assert len(chunks) == 3
+    print(f"{camera.name!r}: Audio {chunks[0].samples.shape} at {chunks[0].time}")

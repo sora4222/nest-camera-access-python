@@ -4,6 +4,7 @@ import asyncio
 from collections.abc import Callable
 from contextlib import suppress
 
+from googlenestcam.audio_chunk import AudioChunk
 from googlenestcam.errors import StreamError
 from googlenestcam.frame import Frame
 from googlenestcam.frame_size import Size
@@ -27,6 +28,7 @@ class ReconnectingSession:
         on_error: Callable[[Exception], None],
         retries: int = 3,
         size: Size | None = None,
+        on_audio: Callable[[AudioChunk], None] | None = None,
     ) -> None:
         """Prepare the session; see ``WebRtcSession`` for the arguments."""
         if retries < 0:
@@ -36,6 +38,7 @@ class ReconnectingSession:
         self._on_error = on_error
         self._retries = retries
         self._size = size
+        self._on_audio = on_audio
         self._failures = 0
         self._session: WebRtcSession | None = None
         self._reconnecting: asyncio.Task[None] | None = None
@@ -71,7 +74,9 @@ class ReconnectingSession:
             if session is self._session:
                 self._dropped(error)
 
-        session = WebRtcSession(self._run_command, on_frame, on_error, self._size)
+        session = WebRtcSession(
+            self._run_command, on_frame, on_error, self._size, self._on_audio
+        )
         return session
 
     def _dropped(self, error: Exception) -> None:
