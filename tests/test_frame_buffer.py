@@ -86,7 +86,7 @@ def test_size_must_be_positive() -> None:
 def test_on_full_must_be_known() -> None:
     """A typo in ``on_full`` fails early."""
     with pytest.raises(ValueError, match="on_full"):
-        FrameBuffer(size=2, on_full="ignore")  # type: ignore[arg-type]
+        FrameBuffer(size=2, on_full="ignore")  # ty: ignore[invalid-argument-type]
 
 
 # Both modes

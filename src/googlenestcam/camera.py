@@ -8,7 +8,7 @@ from googlenestcam import background_loop
 from googlenestcam.frame import Frame
 from googlenestcam.frame_size import Size, check_size
 from googlenestcam.snapshot import take_snapshot
-from googlenestcam.frame_queue import OnFull
+from googlenestcam.frame_buffer import OnFull
 from googlenestcam.stream import AsyncStream, FrameMode, Stream
 from googlenestcam.webrtc_session import RunCommand
 

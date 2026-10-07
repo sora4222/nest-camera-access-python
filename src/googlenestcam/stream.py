@@ -7,9 +7,8 @@ from typing import Literal, Self
 
 from googlenestcam import background_loop
 from googlenestcam.frame import Frame
+from googlenestcam.frame_buffer import FrameBuffer, OnFull
 from googlenestcam.frame_size import Size
-from googlenestcam.frame_queue import FrameQueue, OnFull
-from googlenestcam.latest_frame import LatestFrame
 from googlenestcam.reconnect import ReconnectingSession
 from googlenestcam.webrtc_session import RunCommand
 
@@ -27,9 +26,9 @@ class _StreamParts:
         size: Size | None = None,
     ) -> None:
         if frames == "latest":
-            self._frames: LatestFrame | FrameQueue = LatestFrame()
+            self._frames = FrameBuffer.latest()
         elif frames == "all":
-            self._frames = FrameQueue(queue_size, on_full)
+            self._frames = FrameBuffer(queue_size, on_full)
         else:
             raise ValueError('frames must be "latest" or "all"')
         self._session = ReconnectingSession(
@@ -39,7 +38,7 @@ class _StreamParts:
     @property
     def dropped(self) -> int:
         """Frames dropped in Every-frame mode with ``on_full="drop_oldest"``."""
-        return self._frames.dropped if isinstance(self._frames, FrameQueue) else 0
+        return self._frames.dropped
 
 
 class Stream(_StreamParts):

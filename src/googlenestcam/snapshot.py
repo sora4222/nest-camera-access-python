@@ -4,8 +4,8 @@ import asyncio
 
 from googlenestcam.errors import SnapshotTimeoutError, StreamError
 from googlenestcam.frame import Frame
+from googlenestcam.frame_buffer import FrameBuffer
 from googlenestcam.frame_size import Size
-from googlenestcam.latest_frame import LatestFrame
 from googlenestcam.webrtc_session import RunCommand, WebRtcSession
 
 
@@ -24,7 +24,7 @@ async def take_snapshot(
             of the Stream starting.
         StreamError: If Google refuses or the Stream fails.
     """
-    frames = LatestFrame()
+    frames = FrameBuffer.latest()
     session = WebRtcSession(
         run_command, on_frame=frames.put, on_error=frames.fail, size=size
     )
