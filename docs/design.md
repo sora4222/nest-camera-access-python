@@ -14,6 +14,8 @@ cam = gnc.camera("Front door")  # by Google Home name or Google ID
 frame = cam.snapshot()  # slow: opens and closes a Stream
 frame.image  # NumPy array, height x width x 3, RGB
 frame.time
+frame.to_pil()  # Pillow image; needs googlenestcam[images]
+frame.to_jpeg(quality=85)  # JPEG bytes; needs googlenestcam[images]
 
 with cam.stream() as s:  # Latest mode, Audio on
     for frame in s.frames():  # loops until you break or leave the block
