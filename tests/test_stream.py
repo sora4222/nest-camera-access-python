@@ -1,5 +1,6 @@
 """Tests for live Streams, against a fake Google with a local WebRTC peer."""
 
+import logging
 import time
 from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
@@ -107,10 +108,10 @@ def test_every_frame_mode_raises_when_the_reader_is_slow(camera) -> None:
             next(frames)
 
 
-def test_every_frame_mode_can_drop_the_oldest(camera) -> None:
+def test_every_frame_mode_can_drop_the_oldest(camera, caplog) -> None:
     """With drop_oldest, a slow reader keeps going and drops are counted."""
     with (
-        pytest.warns(UserWarning, match="dropped"),
+        caplog.at_level(logging.WARNING, logger="googlenestcam"),
         camera.stream(frames="all", queue_size=3, on_full="drop_oldest") as stream,
     ):
         frames = stream.frames()
@@ -118,6 +119,7 @@ def test_every_frame_mode_can_drop_the_oldest(camera) -> None:
         time.sleep(0.5)
         assert len(first_frames(frames, 3)) == 3
         assert stream.dropped > 0
+    assert "dropped" in caplog.text
 
 
 def test_unknown_frame_mode_is_refused(camera) -> None:
