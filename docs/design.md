@@ -51,6 +51,7 @@ Setup steps: [login.md](login.md).
 - A Stream runs on the hidden background loop. Leaving the `with` block stops it at Google (`StopWebRtcStream`), also after an error. It is extended a minute before Google's 5-minute expiry, so it can run for hours.
 - **Latest mode** is the default. In **Every-frame mode** (`cam.stream(frames="all", queue_size=100)`), a full queue raises a clear error by default; `on_full="drop_oldest"` drops the oldest Frame, warns once and counts drops in `stream.dropped`.
 - Frames have helpers to get a Pillow image or JPEG bytes.
+- **Frame size**: `cam.stream(size=720)` (height; width keeps the shape) or `size=(640, 360)` resizes every Frame before you get it, so later steps run faster. `snapshot()` takes `size` too. Google's API has no way to ask a Camera for a smaller video, so the package resizes. Off by default. See [the spec](../.scratch/frame-size/spec.md).
 - When the connection drops, the Stream starts a new session by itself, up to `retries` times in a row (3 by default, 1 second apart). The count resets once a Frame arrives. After the last failed try, `frames()` raises `StreamError`.
 - Only Cameras that stream over WebRTC are supported. Older RTSP cameras are not.
 

@@ -4,12 +4,17 @@ import asyncio
 
 from googlenestcam.errors import SnapshotTimeoutError, StreamError
 from googlenestcam.frame import Frame
+from googlenestcam.frame_size import Size
 from googlenestcam.latest_frame import LatestFrame
 from googlenestcam.webrtc_session import RunCommand, WebRtcSession
 
 
 # The timeout only covers waiting for the Frame, so it matches snapshot().
-async def take_snapshot(run_command: RunCommand, timeout: float) -> Frame:  # noqa: ASYNC109
+async def take_snapshot(
+    run_command: RunCommand,
+    timeout: float,  # noqa: ASYNC109
+    size: Size | None = None,
+) -> Frame:
     """Open a Stream, wait for its first Frame, and always stop it.
 
     Runs on the background loop.
@@ -20,7 +25,9 @@ async def take_snapshot(run_command: RunCommand, timeout: float) -> Frame:  # no
         StreamError: If Google refuses or the Stream fails.
     """
     frames = LatestFrame()
-    session = WebRtcSession(run_command, on_frame=frames.put, on_error=frames.fail)
+    session = WebRtcSession(
+        run_command, on_frame=frames.put, on_error=frames.fail, size=size
+    )
     await session.start()
     try:
         frame = await asyncio.wait_for(asyncio.to_thread(frames.get), timeout)

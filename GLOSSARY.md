@@ -24,6 +24,10 @@ _Avoid_: Real-time mode, live mode
 A way of reading a Stream that gives every Frame in order, failing if the reader falls too far behind.
 _Avoid_: Queue mode, buffered mode
 
+**Frame size**:
+The width and height a developer asks Frames to be resized to before they get them. Google always sends the Camera's own size.
+_Avoid_: Resolution (that is what the Camera sends)
+
 **Snapshot**:
 A single Frame got by briefly opening a Stream and closing it again. Slow; open a Stream when many Frames are needed.
 _Avoid_: Photo, capture, still

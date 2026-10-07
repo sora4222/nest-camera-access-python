@@ -17,6 +17,7 @@ from av import VideoFrame
 
 from googlenestcam.errors import GoogleApiError, StreamError
 from googlenestcam.frame import Frame, Image
+from googlenestcam.frame_size import Size, target_size
 from googlenestcam.webrtc_offer import create_peer_connection, fix_google_answer
 
 type RunCommand = Callable[[str, dict[str, Any]], Awaitable[dict[str, Any]]]
@@ -31,8 +32,11 @@ def parse_google_time(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00"))
 
 
-def _rgb(frame: VideoFrame) -> Image:
-    return cast(Image, frame.to_ndarray(format="rgb24"))
+def _rgb(frame: VideoFrame, size: Size | None) -> Image:
+    if size is None:
+        return cast(Image, frame.to_ndarray(format="rgb24"))
+    width, height = target_size(size, frame.width, frame.height)
+    return cast(Image, frame.to_ndarray(width=width, height=height, format="rgb24"))
 
 
 class WebRtcSession:
@@ -43,6 +47,7 @@ class WebRtcSession:
         run_command: RunCommand,
         on_frame: Callable[[Frame], None],
         on_error: Callable[[Exception], None],
+        size: Size | None = None,
     ) -> None:
         """Prepare a session.
 
@@ -50,10 +55,13 @@ class WebRtcSession:
             run_command: Runs a ``CameraLiveStream`` command for this Camera.
             on_frame: Called with each new Frame.
             on_error: Called once the session stops working.
+            size: Resize each Frame to this height or ``(width, height)``;
+                ``None`` keeps it.
         """
         self._run_command = run_command
         self._on_frame = on_frame
         self._on_error = on_error
+        self._size = size
         self._connection: RTCPeerConnection | None = None
         self._media_session_id: str | None = None
         self._expires_at = datetime.now(UTC)
@@ -135,7 +143,7 @@ class WebRtcSession:
                 received = datetime.now(UTC)
                 if not isinstance(frame, VideoFrame):
                     continue
-                image = await asyncio.to_thread(_rgb, frame)
+                image = await asyncio.to_thread(_rgb, frame, self._size)
                 self._on_frame(Frame(image, received))
         except MediaStreamError:
             self._fail(StreamError("The Camera stopped sending video"))
