@@ -8,15 +8,19 @@ Also builds the **fake-Google test kit** later tickets reuse: a fake httpx trans
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** ready-for-human (PR open; real Camera test not yet run)
 
-- [ ] `Frame` has `.image` and `.time`; `np.asarray(frame)` works.
-- [ ] Latest mode always gives the newest Frame; old ones are skipped.
-- [ ] Extend is called before expiry (fake Google gives a short `expiresAt`).
-- [ ] Leaving the `with` block calls `StopWebRtcStream` and closes the peer, also after an error inside the block.
-- [ ] Google refusing the stream gives a clear package error.
-- [ ] Works in a plain script and inside a running event loop (Jupyter).
-- [ ] `stream_async()` gives the same Frames.
-- [ ] Unit tests run with no internet, using the fake-Google kit; the fake answer has a blank candidate foundation.
+- [x] `Frame` has `.image` and `.time`; `np.asarray(frame)` works.
+- [x] Latest mode always gives the newest Frame; old ones are skipped.
+- [x] Extend is called before expiry (fake Google gives a short `expiresAt`).
+- [x] Leaving the `with` block calls `StopWebRtcStream` and closes the peer, also after an error inside the block.
+- [x] Google refusing the stream gives a clear package error.
+- [x] Works in a plain script and inside a running event loop (Jupyter).
+- [x] `stream_async()` gives the same Frames.
+- [x] Unit tests run with no internet, using the fake-Google kit; the fake answer has a blank candidate foundation.
 - [ ] `real_camera` test reads a few Frames from a real Camera.
-- [ ] `make check` and `make test` pass.
+- [x] `make check` and `make test` pass.
+
+## Comments
+
+- Built in branch `claude/implement-spec-qbf2f2` on top of the Camera list PR. The `real_camera` test is written but needs Jesse to run `make test_real_cameras`.

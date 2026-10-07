@@ -16,10 +16,10 @@ frame.image  # NumPy array, height x width x 3, RGB
 frame.time
 
 with cam.stream() as s:  # Latest mode, Audio on
-    for frame in s.frames():
+    for frame in s.frames():  # loops until you break or leave the block
         ...
-    for chunk in s.audio():
-        chunk.samples, chunk.time  # NumPy samples at 48 kHz
+# Audio: read s.audio() in another thread at the same time;
+# each chunk has .samples (NumPy, 48 kHz) and .time.
 
 with cam.stream(frames="all", audio=False) as s:  # Every-frame mode
     ...
@@ -46,6 +46,7 @@ Setup steps: [login.md](login.md).
 
 ## Streams
 
+- A Stream runs on the hidden background loop. Leaving the `with` block stops it at Google (`StopWebRtcStream`), also after an error. It is extended a minute before Google's 5-minute expiry, so it can run for hours.
 - **Latest mode** is the default. In **Every-frame mode**, a full queue raises a clear error by default; an option drops the oldest Frame, warns and counts drops.
 - Frames have helpers to get a Pillow image or JPEG bytes.
 - When the connection drops, the Stream reconnects a set number of times, then raises an error.
