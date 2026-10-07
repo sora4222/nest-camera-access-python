@@ -46,3 +46,12 @@ Pick one:
 ## When there is no Token
 
 By default the package starts a browser login when it needs a Token and has none. To get a `MissingTokenError` instead, pass `on_missing_token="raise"`.
+
+## Real camera tests (developers of this package)
+
+Put your Credentials in a `.env` file in the repo root (it is git-ignored), then:
+
+```sh
+make login               # once, saves the Token
+make test_real_cameras   # prints why any test was skipped
+```
