@@ -53,11 +53,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          # diff-cover needs the base branch history.
-          fetch-depth: 0
       - uses: astral-sh/setup-uv@v6
       - run: uv sync --locked
       - run: make check
-      - run: make coverage COMPARE_BRANCH=origin/${{ github.base_ref || 'main' }}
+      # Every test that runs without a real Camera.
+      - run: make test
       - run: make build

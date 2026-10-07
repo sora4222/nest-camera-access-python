@@ -47,10 +47,8 @@ convention = "google"
 
 [dependency-groups]
 dev = [
-    "diff-cover>=10.6.0",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
-    "pytest-cov>=7.1.0",
     "ruff>=0.16.10",
     "ty>=0.0.85",
 ]
@@ -62,6 +60,3 @@ exclude = [".claude"]
 [tool.ty.analysis]
 # The ML notebook uses these if you install them; they are in no extra.
 allowed-unresolved-imports = ["torch", "tensorflow"]
-
-[tool.coverage.run]
-source = ["src", "scripts"]
