@@ -1,6 +1,6 @@
 """The developer's Nest account: lists and picks Cameras."""
 
-from typing import Literal
+from typing import Any, Literal
 
 import httpx
 
@@ -66,6 +66,14 @@ class Nest:
         )
         cameras = (Camera.from_device(device, self) for device in devices)
         return [camera for camera in cameras if camera is not None]
+
+    async def _execute_command(
+        self, device_id: str, command: str, params: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Run a device command on the background loop; see ``sdm.execute_command``."""
+        return await sdm.execute_command(
+            await self._http(), await self._access_token(), device_id, command, params
+        )
 
     async def _camera(self, name_or_id: str) -> Camera:
         return find_camera(await self._list_cameras(), name_or_id)

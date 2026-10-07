@@ -1,7 +1,11 @@
 """A Camera on the developer's Google account."""
 
 from dataclasses import dataclass, field
+from functools import partial
 from typing import TYPE_CHECKING, Any, Self
+
+from googlenestcam.stream import AsyncStream, Stream
+from googlenestcam.webrtc_session import RunCommand
 
 if TYPE_CHECKING:
     from googlenestcam.nest import Nest
@@ -48,3 +52,23 @@ class Camera:
             kind=device.get("type", "").removeprefix(TYPE_PREFIX).lower() or "camera",
             nest=nest,
         )
+
+    def stream(self) -> Stream:
+        """Open a live Stream in Latest mode; use it in a ``with`` block.
+
+        Example::
+
+            with camera.stream() as stream:
+                for frame in stream.frames():
+                    model(frame.image)
+        """
+        return Stream(self._run_command())
+
+    def stream_async(self) -> AsyncStream:
+        """Async version of ``stream``; use it in an ``async with`` block."""
+        return AsyncStream(self._run_command())
+
+    def _run_command(self) -> RunCommand:
+        if self.nest is None:
+            raise RuntimeError("Get Cameras from list_cameras() or camera() to stream")
+        return partial(self.nest._execute_command, self.id)

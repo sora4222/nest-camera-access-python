@@ -41,3 +41,32 @@ async def list_devices(
         if not body.get("nextPageToken"):
             return devices
         params = {"pageToken": body["nextPageToken"]}
+
+
+async def execute_command(
+    client: httpx.AsyncClient,
+    access_token: str,
+    device_id: str,
+    command: str,
+    params: dict[str, Any],
+) -> dict[str, Any]:
+    """Run a device command and return its ``results``.
+
+    Args:
+        client: HTTP client to use.
+        access_token: A valid access token.
+        device_id: Google's full device ID (``enterprises/.../devices/...``).
+        command: Full command name, like
+            ``sdm.devices.commands.CameraLiveStream.GenerateWebRtcStream``.
+        params: The command's parameters.
+
+    Raises:
+        GoogleApiError: If Google refuses the command.
+    """
+    response = await client.post(
+        f"{API_URL}/{device_id}:executeCommand",
+        headers={"Authorization": f"Bearer {access_token}"},
+        json={"command": command, "params": params},
+    )
+    _raise_for_error(response)
+    return response.json().get("results", {})

@@ -31,3 +31,7 @@ class GoogleApiError(GoogleNestCamError):
 
 class CameraNotFoundError(GoogleNestCamError):
     """No single Camera matches the given name or ID."""
+
+
+class StreamError(GoogleNestCamError):
+    """A Stream could not start or stopped working."""

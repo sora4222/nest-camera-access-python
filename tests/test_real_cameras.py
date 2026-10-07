@@ -28,3 +28,14 @@ def test_lists_real_cameras(nest) -> None:
     for camera in cameras:
         print(f"{camera.name!r} ({camera.kind}) {camera.id}")
     assert nest.camera(cameras[0].id) == cameras[0]
+
+
+def test_streams_frames_from_a_real_camera(nest) -> None:
+    """A few Frames arrive from the first Camera."""
+    camera = nest.list_cameras()[0]
+    with camera.stream() as stream:
+        frames = [frame for frame, _ in zip(stream.frames(), range(3), strict=False)]
+    assert len(frames) == 3
+    height, width, colours = frames[0].image.shape
+    print(f"{camera.name!r}: {width}x{height} at {frames[0].time}")
+    assert colours == 3

@@ -5,7 +5,9 @@ description = "Quick access to Google Nest Cameras for Python developers"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "aiortc>=1.15.0",
     "httpx>=0.28.1",
+    "numpy>=2.5.3",
 ]
 
 [project.optional-dependencies]
@@ -23,6 +25,10 @@ pythonpath = ["."]
 markers = [
     "real_camera: needs a real Token, Credentials and Camera; run with `make test_real_cameras`",
 ]
+
+[tool.ruff]
+# Issue notes, not code.
+extend-exclude = [".scratch"]
 
 [tool.ruff.lint]
 select = ["D", "E", "F", "UP", "RUF", "ASYNC"]
