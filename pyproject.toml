@@ -17,6 +17,12 @@ onepassword = [
 images = [
     "pillow>=12.3.0",
 ]
+notebooks = [
+    "jupyter>=1.1.1",
+    "matplotlib>=3.11.2",
+    "opencv-python-headless>=5.0.0.93",
+    "pillow>=12.3.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.8.0,<0.12"]
