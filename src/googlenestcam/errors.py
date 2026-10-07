@@ -39,3 +39,7 @@ class StreamError(GoogleNestCamError):
 
 class SnapshotTimeoutError(StreamError, TimeoutError):
     """No Frame arrived in time for a Snapshot."""
+
+
+class MissingExtraError(GoogleNestCamError, ImportError):
+    """An optional extra, such as ``googlenestcam[images]``, is not installed."""
