@@ -5,7 +5,7 @@ ENV_FILE := $(if $(wildcard .env),--env-file .env,)
 
 # Unit tests with fake Google replies. Runs anywhere.
 test:
-	uv run pytest -m "not real_camera"
+	uv run --extra images pytest -m "not real_camera"
 
 # Tests against real Cameras. Needs a Token and Credentials; never run in CI.
 # -rs prints why a test was skipped. Exit code 5 (no tests collected) is not a failure.
@@ -20,7 +20,7 @@ login:
 check:
 	uv run ruff format --check .
 	uv run ruff check .
-	uv run --extra onepassword ty check
+	uv run --extra onepassword --extra images ty check
 
 # Build the wheel and source package into dist/ for other projects to install.
 build:

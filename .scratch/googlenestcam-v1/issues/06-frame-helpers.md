@@ -4,11 +4,13 @@
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] `to_pil()` returns a Pillow RGB image the same size as `.image`.
-- [ ] `to_jpeg(quality=...)` returns JPEG bytes.
-- [ ] Without Pillow: clear error that says to install `googlenestcam[images]`. No error on import.
-- [ ] `[images]` extra added; base install still has no Pillow.
-- [ ] Unit tests.
-- [ ] `make check` and `make test` pass.
+- [x] `to_pil()` returns a Pillow RGB image the same size as `.image`.
+- [x] `to_jpeg(quality=...)` returns JPEG bytes.
+- [x] Without Pillow: clear error that says to install `googlenestcam[images]`. No error on import.
+- [x] `[images]` extra added; base install still has no Pillow.
+- [x] Unit tests.
+- [x] `make check` and `make test` pass.
+
+Notes: Pillow is imported only in `src/googlenestcam/pillow_image.py`; without it the helpers raise `MissingExtraError` (an `ImportError`). A human can check `cam.snapshot().to_jpeg()` on a real Camera.
