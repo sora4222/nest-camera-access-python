@@ -30,8 +30,8 @@ markers = [
 ]
 
 [tool.ruff]
-# Issue notes, not code.
-extend-exclude = [".scratch"]
+# Issue notes and agent worktrees, not package code.
+extend-exclude = [".scratch", ".claude"]
 
 [tool.ruff.lint]
 select = ["D", "E", "F", "UP", "RUF", "ASYNC"]
@@ -46,3 +46,7 @@ dev = [
     "ruff>=0.16.10",
     "ty>=0.0.85",
 ]
+
+[tool.ty.src]
+# Agent worktrees hold other checkouts of this repo.
+exclude = [".claude"]
