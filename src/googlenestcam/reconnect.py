@@ -6,6 +6,7 @@ from contextlib import suppress
 
 from googlenestcam.errors import StreamError
 from googlenestcam.frame import Frame
+from googlenestcam.frame_size import Size
 from googlenestcam.webrtc_session import RunCommand, WebRtcSession
 
 RETRY_DELAY_SECONDS = 1.0
@@ -25,6 +26,7 @@ class ReconnectingSession:
         on_frame: Callable[[Frame], None],
         on_error: Callable[[Exception], None],
         retries: int = 3,
+        size: Size | None = None,
     ) -> None:
         """Prepare the session; see ``WebRtcSession`` for the arguments."""
         if retries < 0:
@@ -33,6 +35,7 @@ class ReconnectingSession:
         self._on_frame = on_frame
         self._on_error = on_error
         self._retries = retries
+        self._size = size
         self._failures = 0
         self._session: WebRtcSession | None = None
         self._reconnecting: asyncio.Task[None] | None = None
@@ -68,7 +71,7 @@ class ReconnectingSession:
             if session is self._session:
                 self._dropped(error)
 
-        session = WebRtcSession(self._run_command, on_frame, on_error)
+        session = WebRtcSession(self._run_command, on_frame, on_error, self._size)
         return session
 
     def _dropped(self, error: Exception) -> None:

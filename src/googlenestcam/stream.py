@@ -7,6 +7,7 @@ from typing import Literal, Self
 
 from googlenestcam import background_loop
 from googlenestcam.frame import Frame
+from googlenestcam.frame_size import Size
 from googlenestcam.frame_queue import FrameQueue, OnFull
 from googlenestcam.latest_frame import LatestFrame
 from googlenestcam.reconnect import ReconnectingSession
@@ -23,6 +24,7 @@ class _StreamParts:
         queue_size: int = 100,
         on_full: OnFull = "raise",
         retries: int = 3,
+        size: Size | None = None,
     ) -> None:
         if frames == "latest":
             self._frames: LatestFrame | FrameQueue = LatestFrame()
@@ -31,7 +33,7 @@ class _StreamParts:
         else:
             raise ValueError('frames must be "latest" or "all"')
         self._session = ReconnectingSession(
-            run_command, self._frames.put, self._frames.fail, retries
+            run_command, self._frames.put, self._frames.fail, retries, size
         )
 
     @property

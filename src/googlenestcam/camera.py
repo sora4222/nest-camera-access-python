@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, Self
 
 from googlenestcam import background_loop
 from googlenestcam.frame import Frame
+from googlenestcam.frame_size import Size, check_size
 from googlenestcam.snapshot import take_snapshot
 from googlenestcam.frame_queue import OnFull
 from googlenestcam.stream import AsyncStream, FrameMode, Stream
@@ -57,7 +58,7 @@ class Camera:
             nest=nest,
         )
 
-    def snapshot(self, timeout: float = 20) -> Frame:
+    def snapshot(self, timeout: float = 20, *, size: Size | None = None) -> Frame:
         """Take one Frame.
 
         This is slow: it starts a Stream, waits for one Frame and stops it.
@@ -65,17 +66,26 @@ class Camera:
 
         Args:
             timeout: Seconds to wait for the Frame once the Stream starts.
+            size: Resize the Frame to ``(width, height)``; see ``stream()``.
 
         Raises:
             SnapshotTimeoutError: If no Frame arrives in time.
             StreamError: If Google refuses to stream.
+            ValueError: If ``size`` is not two whole numbers of at least 1.
         """
-        return background_loop.run(take_snapshot(self._run_command(), timeout))
+        size = check_size(size)
+        return background_loop.run(take_snapshot(self._run_command(), timeout, size))
 
-    async def snapshot_async(self, timeout: float = 20) -> Frame:  # noqa: ASYNC109
+    async def snapshot_async(
+        self,
+        timeout: float = 20,  # noqa: ASYNC109
+        *,
+        size: Size | None = None,
+    ) -> Frame:
         """Async version of ``snapshot``."""
+        size = check_size(size)
         return await background_loop.run_async(
-            take_snapshot(self._run_command(), timeout)
+            take_snapshot(self._run_command(), timeout, size)
         )
 
     def stream(
@@ -85,6 +95,7 @@ class Camera:
         queue_size: int = 100,
         on_full: OnFull = "raise",
         retries: int = 3,
+        size: Size | None = None,
     ) -> Stream:
         """Open a live Stream; use it in a ``with`` block.
 
@@ -105,8 +116,16 @@ class Camera:
             retries: How many times in a row to reconnect after the
                 connection drops. After the last failed try, ``frames()``
                 raises ``StreamError``.
+            size: Resize every Frame to ``(width, height)``, for example
+                ``(640, 360)``, so later steps run faster. Google cannot send
+                a smaller video, so this is done here. ``None`` keeps the
+                Camera's size.
+
+        Raises:
+            ValueError: If ``size`` is not two whole numbers of at least 1.
         """
-        return Stream(self._run_command(), frames, queue_size, on_full, retries)
+        size = check_size(size)
+        return Stream(self._run_command(), frames, queue_size, on_full, retries, size)
 
     def stream_async(
         self,
@@ -115,9 +134,13 @@ class Camera:
         queue_size: int = 100,
         on_full: OnFull = "raise",
         retries: int = 3,
+        size: Size | None = None,
     ) -> AsyncStream:
         """Async version of ``stream``; use it in an ``async with`` block."""
-        return AsyncStream(self._run_command(), frames, queue_size, on_full, retries)
+        size = check_size(size)
+        return AsyncStream(
+            self._run_command(), frames, queue_size, on_full, retries, size
+        )
 
     def _run_command(self) -> RunCommand:
         if self.nest is None:
