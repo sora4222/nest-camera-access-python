@@ -70,7 +70,7 @@ Events (motion, person, doorbell) through Google Pub/Sub. Pub/Sub costs money, s
 | `googlenestcam` | `aiortc`, `httpx`, `numpy` |
 | `googlenestcam[onepassword]` | 1Password |
 | `googlenestcam[images]` | Pillow, for image and JPEG helpers |
-| `googlenestcam[notebooks]` | Jupyter, OpenCV, Matplotlib |
+| `googlenestcam[notebooks]` | Jupyter, OpenCV (headless), Matplotlib, Pillow |
 
 PyTorch and TensorFlow are in no extra; the notebook that uses them says how to install them.
 
