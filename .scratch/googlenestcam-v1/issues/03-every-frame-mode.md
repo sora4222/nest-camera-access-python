@@ -4,11 +4,11 @@
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** ready-for-human (PR open)
 
-- [ ] `frames="latest"` stays the default; `frames="all"` gives every Frame in order.
-- [ ] `queue_size` can be set.
-- [ ] Full queue raises a clear error from `frames()` by default.
-- [ ] `on_full="drop_oldest"` drops the oldest, warns once, and `s.dropped` gives the count.
-- [ ] Unit tests use the fake-Google kit sending fast and a slow reader.
-- [ ] `make check` and `make test` pass.
+- [x] `frames="latest"` stays the default; `frames="all"` gives every Frame in order.
+- [x] `queue_size` can be set.
+- [x] Full queue raises a clear error from `frames()` by default.
+- [x] `on_full="drop_oldest"` drops the oldest, warns once, and `s.dropped` gives the count.
+- [x] Unit tests use the fake-Google kit sending fast and a slow reader.
+- [x] `make check` and `make test` pass.
