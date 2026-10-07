@@ -29,4 +29,4 @@ def test_frame_is_frozen() -> None:
     """A Frame cannot be changed after it is made."""
     frame = Frame(np.zeros((1, 1, 3), dtype=np.uint8), datetime.now(UTC))
     with pytest.raises(AttributeError):
-        frame.time = datetime.now(UTC)  # type: ignore[misc]
+        frame.time = datetime.now(UTC)  # ty: ignore[invalid-assignment]
