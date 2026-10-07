@@ -1,7 +1,29 @@
 [project]
-name = "nest-camera-access-python"
+name = "googlenestcam"
 version = "0.1.0"
-description = "Add your description here"
+description = "Quick access to Google Nest Cameras for Python developers"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.8.0,<0.12"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+markers = [
+    "real_camera: needs a real Token, Credentials and Camera; run with `make test_real_cameras`",
+]
+
+[tool.ruff.lint]
+select = ["D", "E", "F", "UP", "RUF", "ASYNC"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.10",
+    "ty>=0.0.85",
+]
