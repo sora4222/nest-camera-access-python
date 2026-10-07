@@ -1,4 +1,4 @@
-.PHONY: test test_real_cameras login check build
+.PHONY: test test_real_cameras coverage login check build
 
 # Load a local .env (never committed) for commands that talk to Google.
 ENV_FILE := $(if $(wildcard .env),--env-file .env,)
@@ -6,6 +6,13 @@ ENV_FILE := $(if $(wildcard .env),--env-file .env,)
 # Unit tests with fake Google replies. Runs anywhere.
 test:
 	uv run --extra images pytest -m "not real_camera"
+
+# Unit tests, then fail if under 80% of the lines this branch changed are tested.
+# Compares with COMPARE_BRANCH (default origin/main).
+COMPARE_BRANCH ?= origin/main
+coverage:
+	uv run --extra images pytest -m "not real_camera" --cov --cov-report=xml
+	uv run diff-cover coverage.xml --compare-branch=$(COMPARE_BRANCH) --fail-under=80
 
 # Tests against real Cameras. Needs a Token and Credentials; never run in CI.
 # -rs prints why a test was skipped. Exit code 5 (no tests collected) is not a failure.
