@@ -58,5 +58,5 @@ dev = [
 exclude = [".claude"]
 
 [tool.ty.analysis]
-# The ML notebook uses these if you install them; they are in no extra.
-allowed-unresolved-imports = ["torch", "tensorflow"]
+# Notebooks use these if you install them; they are in no extra.
+allowed-unresolved-imports = ["torch", "tensorflow", "whisper"]

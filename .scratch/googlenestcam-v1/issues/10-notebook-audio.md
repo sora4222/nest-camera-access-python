@@ -4,7 +4,9 @@
 
 **Blocked by:** 07, 08
 
-**Status:** ready-for-agent
+**Status:** ready-for-human
 
-- [ ] Saved with no outputs, Tokens or Camera IDs.
+- [x] Saved with no outputs, Tokens or Camera IDs.
 - [ ] Runs top to bottom with a real Camera.
+
+**Notes:** Notebook is `notebooks/05-audio.ipynb`. It runs Whisper only if you install it yourself (`pip install openai-whisper`); `ty` allows `whisper` to be missing. There was no real Camera when this was built, so it was not run; a human must run it top to bottom and save it again with no outputs.
