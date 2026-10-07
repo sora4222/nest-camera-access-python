@@ -11,7 +11,7 @@ import httpx
 from googlenestcam.credentials import Credentials, load_credentials
 from googlenestcam.oauth import authorization_url, code_from_address, exchange_code
 from googlenestcam.redirect_receiver import RedirectReceiver
-from googlenestcam.token_store import save_refresh_token
+from googlenestcam.token_store import TokenPath, save_refresh_token
 
 LoginMode = Literal["browser", "server"]
 SERVER_REDIRECT_URI = "https://www.google.com"
@@ -24,7 +24,7 @@ def login(
     client_secret: str | None = None,
     project_id: str | None = None,
     credentials: Credentials | None = None,
-    token_path: Path | None = None,
+    token_path: TokenPath | None = None,
     port: int = 8080,
     timeout: float = 300,
     open_url: Callable[[str], bool] = webbrowser.open,
@@ -41,7 +41,7 @@ def login(
         client_secret: OAuth client secret.
         project_id: Device Access project ID.
         credentials: Ready-made Credentials, instead of the three values.
-        token_path: Where to save the Token; see ``default_token_path``.
+        token_path: Where to save the Token; see ``find_token_path``.
         port: Local port for ``"browser"`` mode.
         timeout: Seconds to wait for the browser in ``"browser"`` mode.
         open_url: Opens a URL in a browser.

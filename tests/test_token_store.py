@@ -7,21 +7,35 @@ import pytest
 
 from googlenestcam.errors import TokenError
 from googlenestcam.token_store import (
-    default_token_path,
+    find_token_path,
     load_refresh_token,
     save_refresh_token,
 )
 
 
-def test_default_path_is_in_user_config(tmp_path) -> None:
-    """The Token lives in the user config folder, not the project."""
-    assert default_token_path() == tmp_path / "config" / "googlenestcam" / "token.json"
+def test_user_config_is_the_last_resort(tmp_path) -> None:
+    """With nothing else set, the Token lives in the user config folder."""
+    assert find_token_path() == tmp_path / "config" / "googlenestcam" / "token.json"
 
 
-def test_environment_overrides_path(monkeypatch, tmp_path) -> None:
-    """GOOGLENESTCAM_TOKEN_PATH changes where the Token is kept."""
+def test_token_in_current_folder_is_found(tmp_path) -> None:
+    """An existing ./token.json (such as in a repo root) is used."""
+    (tmp_path / "work" / "token.json").write_text("{}")
+    assert find_token_path() == tmp_path / "work" / "token.json"
+
+
+def test_environment_wins_over_current_folder(monkeypatch, tmp_path) -> None:
+    """GOOGLENESTCAM_TOKEN_PATH wins over ./token.json."""
+    (tmp_path / "work" / "token.json").write_text("{}")
     monkeypatch.setenv("GOOGLENESTCAM_TOKEN_PATH", str(tmp_path / "t.json"))
-    assert default_token_path() == tmp_path / "t.json"
+    assert find_token_path() == tmp_path / "t.json"
+
+
+def test_path_in_code_wins(monkeypatch, tmp_path) -> None:
+    """A path passed in code, as text or Path, wins over everything."""
+    monkeypatch.setenv("GOOGLENESTCAM_TOKEN_PATH", str(tmp_path / "t.json"))
+    assert find_token_path(str(tmp_path / "mine.json")) == tmp_path / "mine.json"
+    assert find_token_path(tmp_path / "mine.json") == tmp_path / "mine.json"
 
 
 def test_save_then_load(tmp_path) -> None:
@@ -35,7 +49,7 @@ def test_save_then_load(tmp_path) -> None:
 def test_save_uses_default_path() -> None:
     """Saving with no path uses the default path."""
     path = save_refresh_token("refresh")
-    assert path == default_token_path()
+    assert path == find_token_path()
     assert load_refresh_token() == "refresh"
 
 

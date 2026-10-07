@@ -33,7 +33,14 @@ gnc.login(
 )  # no browser: open the link on any device, then paste the google.com address
 ```
 
-The Token is saved to `~/.config/googlenestcam/token.json` (only you can read it). Change this with `token_path=` or `GOOGLENESTCAM_TOKEN_PATH`.
+The Token file (only you can read it) is found in this order:
+
+1. `token_path=` in code, as text or a `Path`
+2. `GOOGLENESTCAM_TOKEN_PATH`
+3. `./token.json`, if it exists in the folder you run from
+4. `~/.config/googlenestcam/token.json`, the last resort
+
+If you keep `token.json` in a repo, add it to `.gitignore`.
 
 ## On a server
 

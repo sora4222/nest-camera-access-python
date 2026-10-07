@@ -2,7 +2,6 @@
 
 import asyncio
 from datetime import UTC, datetime, timedelta
-from pathlib import Path
 from typing import Literal
 
 import httpx
@@ -11,7 +10,7 @@ from googlenestcam.credentials import Credentials, load_credentials
 from googlenestcam.errors import MissingTokenError
 from googlenestcam.login import login
 from googlenestcam.oauth import AccessToken, refresh_access_token
-from googlenestcam.token_store import load_refresh_token
+from googlenestcam.token_store import TokenPath, load_refresh_token
 
 MissingTokenAction = Literal["login", "raise"]
 REFRESH_EARLY = timedelta(seconds=60)
@@ -24,7 +23,7 @@ class GoogleAuth:
         self,
         credentials: Credentials | None = None,
         *,
-        token_path: Path | None = None,
+        token_path: TokenPath | None = None,
         on_missing_token: MissingTokenAction = "login",
     ) -> None:
         """Set up access.
@@ -32,7 +31,7 @@ class GoogleAuth:
         Args:
             credentials: Credentials to use; loaded from the environment if
                 not given.
-            token_path: Where the Token is kept.
+            token_path: Where the Token is kept; see ``find_token_path``.
             on_missing_token: ``"login"`` starts a browser Login when there is
                 no Token; ``"raise"`` raises ``MissingTokenError`` instead.
         """

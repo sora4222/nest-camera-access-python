@@ -33,7 +33,7 @@ Setup steps: [login.md](login.md).
 
 
 - **Credentials** come from code arguments or environment variables. 1Password is an optional extra; if it is missing or fails, the package falls back to code or environment values and only raises a clear error when nothing works. It never fails on import.
-- The **Token** is saved in the user config folder (`~/.config/googlenestcam/token.json`), never the project folder. The path can be changed in code or with an environment variable.
+- The **Token** file is found in this order: a path in code, `GOOGLENESTCAM_TOKEN_PATH`, `./token.json` if it exists, then `~/.config/googlenestcam/token.json` as the last resort.
 - When no Token exists, `login()` opens a browser by default. The developer can instead ask for an error, or for **Server login**. See [ADR 0001](adr/0001-server-login-pastes-an-address.md).
 - Other ways to log in a server: an SSH tunnel to the browser Login, or copying the Token (file, environment variable or 1Password).
 

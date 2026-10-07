@@ -17,3 +17,6 @@ def isolated_environment(monkeypatch, tmp_path, request):
         if name.startswith("GOOGLENESTCAM_") or name == "OP_SERVICE_ACCOUNT_TOKEN":
             monkeypatch.delenv(name)
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "config"))
+    work = tmp_path / "work"
+    work.mkdir()
+    monkeypatch.chdir(work)
