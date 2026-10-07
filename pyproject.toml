@@ -5,7 +5,9 @@ description = "Quick access to Google Nest Cameras for Python developers"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "aiortc>=1.15.0",
     "httpx>=0.28.1",
+    "numpy>=2.5.3",
 ]
 
 [project.optional-dependencies]
