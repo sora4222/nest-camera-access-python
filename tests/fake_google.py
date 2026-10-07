@@ -48,6 +48,7 @@ class FakeGoogle:
         commands: Every device command as ``(short name, params)``.
         expires_in: Seconds until each media session expires.
         refuse_stream: When set, ``GenerateWebRtcStream`` fails with this message.
+        send_video: When false, the fake peer connects but sends no video.
     """
 
     def __init__(self) -> None:
@@ -56,6 +57,7 @@ class FakeGoogle:
         self.commands: list[tuple[str, dict[str, Any]]] = []
         self.expires_in = 300
         self.refuse_stream: str | None = None
+        self.send_video = True
         self.peers: list[RTCPeerConnection] = []
         self.transport = httpx.MockTransport(self._handle)
         self._sessions = 0
@@ -108,7 +110,7 @@ class FakeGoogle:
         for transceiver in peer.getTransceivers():
             if transceiver.kind == "audio":
                 transceiver.sender.replaceTrack(AudioStreamTrack())
-            else:
+            elif self.send_video:
                 transceiver.sender.replaceTrack(FakeVideo())
             transceiver.direction = "sendonly"
         await peer.setLocalDescription(await peer.createAnswer())

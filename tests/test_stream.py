@@ -7,34 +7,8 @@ from datetime import UTC, datetime, timedelta
 import numpy as np
 import pytest
 
-from googlenestcam import background_loop
-from googlenestcam.camera import Camera
-from googlenestcam.credentials import Credentials
 from googlenestcam.errors import StreamError
-from googlenestcam.nest import Nest
-from googlenestcam.token_store import save_refresh_token
-from tests.fake_google import COLOUR, HEIGHT, WIDTH, FakeGoogle
-
-
-@pytest.fixture
-def google() -> Iterator[FakeGoogle]:
-    """A fake Google; its peers are closed after the test."""
-    fake = FakeGoogle()
-    yield fake
-    background_loop.run(fake.close())
-
-
-@pytest.fixture
-def camera(google, tmp_path) -> Camera:
-    """The fake Google's "Front door" Camera."""
-    path = tmp_path / "token.json"
-    save_refresh_token("r", path)
-    nest = Nest(
-        credentials=Credentials("id", "secret", "project"),
-        token_path=path,
-        transport=google.transport,
-    )
-    return nest.camera("Front door")
+from tests.fake_google import COLOUR, HEIGHT, WIDTH
 
 
 def first_frames(frames: Iterator, count: int) -> list:
