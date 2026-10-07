@@ -1,5 +1,8 @@
 # Nest Camera Python
 
+The package is named `googlenestcam` (`import googlenestcam`) and targets Python 3.12+.
+Domain terms are defined in [GLOSSARY.md](GLOSSARY.md); use them in code and docs.
+
 This is a Python module intended to allow the Python developer to quickly access their Google Nest Cameras.
 A Jupyter notebook should be written to show to developers how they can use the module to get a stream, a photo or any of the other Google Nest basic functionality
 This module should be handling the authentication, the Google Nest WebRTC, and any of the other functionality through easy to use coding structure, allowing more complex parameters only if the developer wants to access them.
