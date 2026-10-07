@@ -110,7 +110,7 @@ Frames and Audio are read separately. `s.frames()` and `s.audio()` can each be r
 
 **Frame.** A small frozen object: `.image` (NumPy, H × W × 3, RGB, uint8) and `.time` (a timezone-aware UTC datetime for when it was received). It supports `np.asarray(frame)`. Decode with the `av` frame's own `to_ndarray(format="rgb24")`, so the base install needs no Pillow. Decoding runs off the event loop thread.
 
-**Latest mode and Every-frame mode.** `stream(frames="latest" | "all", queue_size=..., on_full="raise" | "drop_oldest")`. Latest mode keeps one slot that each new Frame replaces. Every-frame mode keeps a bounded queue. When full: `"raise"` (default) makes the next `frames()` read raise a clear error; `"drop_oldest"` drops, warns once, and counts in `s.dropped`.
+**Latest mode and Every-frame mode.** `stream(frames="latest" | "all", queue_size=..., on_full="raise" | "drop_oldest")`. Both use one `FrameBuffer` built on `collections.deque(maxlen=...)`. Latest mode is a deque of one Frame that each new Frame replaces. Every-frame mode is a deque of `queue_size` Frames. When full: `"raise"` (default) makes the next `frames()` read raise a clear error; `"drop_oldest"` drops, warns once, and counts in `s.dropped`.
 
 **Reconnect.** `stream(retries=N)` with a small default. On a drop, start a new WebRTC session for the same Camera and carry on feeding the same `frames()`. After N failed tries in a row, the error is raised from `frames()` (and `audio()`). A successful reconnect resets the count.
 
