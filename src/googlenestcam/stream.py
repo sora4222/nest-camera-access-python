@@ -3,24 +3,43 @@
 import asyncio
 from collections.abc import AsyncIterator, Iterator
 from types import TracebackType
-from typing import Self
+from typing import Literal, Self
 
 from googlenestcam import background_loop
 from googlenestcam.frame import Frame
+from googlenestcam.frame_queue import FrameQueue, OnFull
 from googlenestcam.latest_frame import LatestFrame
 from googlenestcam.webrtc_session import RunCommand, WebRtcSession
 
+type FrameMode = Literal["latest", "all"]
+
 
 class _StreamParts:
-    def __init__(self, run_command: RunCommand) -> None:
-        self._frames = LatestFrame()
+    def __init__(
+        self,
+        run_command: RunCommand,
+        frames: FrameMode = "latest",
+        queue_size: int = 100,
+        on_full: OnFull = "raise",
+    ) -> None:
+        if frames == "latest":
+            self._frames: LatestFrame | FrameQueue = LatestFrame()
+        elif frames == "all":
+            self._frames = FrameQueue(queue_size, on_full)
+        else:
+            raise ValueError('frames must be "latest" or "all"')
         self._session = WebRtcSession(
             run_command, on_frame=self._frames.put, on_error=self._frames.fail
         )
 
+    @property
+    def dropped(self) -> int:
+        """Frames dropped in Every-frame mode with ``on_full="drop_oldest"``."""
+        return self._frames.dropped if isinstance(self._frames, FrameQueue) else 0
+
 
 class Stream(_StreamParts):
-    """A live Stream in Latest mode. Use it in a ``with`` block.
+    """A live Stream. Use it in a ``with`` block.
 
     Leaving the block stops the Stream at Google, also after an error.
     """
@@ -45,7 +64,7 @@ class Stream(_StreamParts):
         background_loop.run(self._session.close())
 
     def frames(self) -> Iterator[Frame]:
-        """Yield the newest Frame each time; older unread Frames are skipped.
+        """Yield Frames: the newest in Latest mode, all in order in Every-frame mode.
 
         Raises:
             StreamError: If the Stream stops working.
@@ -77,7 +96,7 @@ class AsyncStream(_StreamParts):
         await background_loop.run_async(self._session.close())
 
     async def frames(self) -> AsyncIterator[Frame]:
-        """Yield the newest Frame each time; older unread Frames are skipped.
+        """Yield Frames: the newest in Latest mode, all in order in Every-frame mode.
 
         Raises:
             StreamError: If the Stream stops working.

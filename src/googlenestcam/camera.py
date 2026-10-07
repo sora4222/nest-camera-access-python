@@ -7,7 +7,8 @@ from typing import TYPE_CHECKING, Any, Self
 from googlenestcam import background_loop
 from googlenestcam.frame import Frame
 from googlenestcam.snapshot import take_snapshot
-from googlenestcam.stream import AsyncStream, Stream
+from googlenestcam.frame_queue import OnFull
+from googlenestcam.stream import AsyncStream, FrameMode, Stream
 from googlenestcam.webrtc_session import RunCommand
 
 if TYPE_CHECKING:
@@ -77,20 +78,41 @@ class Camera:
             take_snapshot(self._run_command(), timeout)
         )
 
-    def stream(self) -> Stream:
-        """Open a live Stream in Latest mode; use it in a ``with`` block.
+    def stream(
+        self,
+        frames: FrameMode = "latest",
+        *,
+        queue_size: int = 100,
+        on_full: OnFull = "raise",
+    ) -> Stream:
+        """Open a live Stream; use it in a ``with`` block.
 
         Example::
 
             with camera.stream() as stream:
                 for frame in stream.frames():
                     model(frame.image)
-        """
-        return Stream(self._run_command())
 
-    def stream_async(self) -> AsyncStream:
+        Args:
+            frames: ``"latest"`` gives the newest Frame and skips ones you were
+                too slow for. ``"all"`` gives every Frame in order.
+            queue_size: In ``"all"`` mode, the most Frames kept unread.
+            on_full: In ``"all"`` mode, what happens when the queue is full:
+                ``"raise"`` makes ``frames()`` raise ``StreamError``;
+                ``"drop_oldest"`` drops the oldest, warns once and counts in
+                ``stream.dropped``.
+        """
+        return Stream(self._run_command(), frames, queue_size, on_full)
+
+    def stream_async(
+        self,
+        frames: FrameMode = "latest",
+        *,
+        queue_size: int = 100,
+        on_full: OnFull = "raise",
+    ) -> AsyncStream:
         """Async version of ``stream``; use it in an ``async with`` block."""
-        return AsyncStream(self._run_command())
+        return AsyncStream(self._run_command(), frames, queue_size, on_full)
 
     def _run_command(self) -> RunCommand:
         if self.nest is None:

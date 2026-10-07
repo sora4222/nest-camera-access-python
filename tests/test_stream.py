@@ -86,3 +86,41 @@ async def test_stream_async_gives_frames(camera, google) -> None:
             assert frame.image.shape == (HEIGHT, WIDTH, 3)
             break
     assert google.command_names()[-1] == "StopWebRtcStream"
+
+
+def test_every_frame_mode_gives_frames_in_order(camera) -> None:
+    """``frames="all"`` gives every Frame, oldest first."""
+    with camera.stream(frames="all", queue_size=50) as stream:
+        frames = first_frames(stream.frames(), 10)
+        assert stream.dropped == 0
+    times = [frame.time for frame in frames]
+    assert times == sorted(times)
+
+
+def test_every_frame_mode_raises_when_the_reader_is_slow(camera) -> None:
+    """A full queue makes the next read raise a clear error."""
+    with camera.stream(frames="all", queue_size=3) as stream:
+        frames = stream.frames()
+        next(frames)
+        time.sleep(0.5)
+        with pytest.raises(StreamError, match="queue is full"):
+            next(frames)
+
+
+def test_every_frame_mode_can_drop_the_oldest(camera) -> None:
+    """With drop_oldest, a slow reader keeps going and drops are counted."""
+    with (
+        pytest.warns(UserWarning, match="dropped"),
+        camera.stream(frames="all", queue_size=3, on_full="drop_oldest") as stream,
+    ):
+        frames = stream.frames()
+        next(frames)
+        time.sleep(0.5)
+        assert len(first_frames(frames, 3)) == 3
+        assert stream.dropped > 0
+
+
+def test_unknown_frame_mode_is_refused(camera) -> None:
+    """A typo in ``frames`` gives a clear error."""
+    with pytest.raises(ValueError, match="frames"):
+        camera.stream(frames="every")
