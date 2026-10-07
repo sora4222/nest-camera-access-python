@@ -1,7 +1,7 @@
 """Tests for the Frame buffer behind Latest mode and Every-frame mode."""
 
+import logging
 import threading
-import warnings
 from datetime import UTC, datetime
 
 import numpy as np
@@ -26,15 +26,15 @@ def values(buffer: FrameBuffer, count: int) -> list[int]:
 # Latest mode
 
 
-def test_latest_gives_only_the_newest_frame() -> None:
+def test_latest_gives_only_the_newest_frame(caplog: pytest.LogCaptureFixture) -> None:
     """Older unread Frames are replaced by newer ones, quietly."""
     buffer = FrameBuffer.latest()
-    with warnings.catch_warnings():
-        warnings.simplefilter("error")
+    with caplog.at_level(logging.DEBUG, logger="googlenestcam"):
         for value in (1, 2, 3):
             buffer.put(make_frame(value))
     assert values(buffer, 1) == [3]
     assert buffer.dropped == 0
+    assert caplog.records == []
 
 
 def test_latest_waits_for_a_new_frame() -> None:
@@ -66,15 +66,28 @@ def test_full_buffer_raises_by_default() -> None:
         buffer.get()
 
 
-def test_drop_oldest_warns_once_and_counts() -> None:
-    """With drop_oldest, old Frames are dropped, counted and warned about once."""
+def test_drop_oldest_logs_and_counts(caplog: pytest.LogCaptureFixture) -> None:
+    """With drop_oldest, the first drop logs a warning and later ones log debug."""
     buffer = FrameBuffer(size=2, on_full="drop_oldest")
-    with pytest.warns(UserWarning, match="dropp") as warned:
+    with caplog.at_level(logging.DEBUG, logger="googlenestcam"):
         for value in (1, 2, 3, 4):
             buffer.put(make_frame(value))
-    assert len(warned) == 1
+    assert [r.levelno for r in caplog.records] == [logging.WARNING, logging.DEBUG]
+    assert "dropp" in caplog.records[0].getMessage()
     assert buffer.dropped == 2
     assert values(buffer, 2) == [3, 4]
+
+
+def test_drop_logs_follow_the_developers_logging_level(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Drop logs go through the ``googlenestcam`` logger, so its level applies."""
+    buffer = FrameBuffer(size=1, on_full="drop_oldest")
+    with caplog.at_level(logging.ERROR, logger="googlenestcam"):
+        buffer.put(make_frame(1))
+        buffer.put(make_frame(2))
+    assert caplog.records == []
+    assert buffer.dropped == 1
 
 
 def test_size_must_be_positive() -> None:
