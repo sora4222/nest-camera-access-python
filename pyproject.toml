@@ -4,13 +4,21 @@ version = "0.1.0"
 description = "Quick access to Google Nest Cameras for Python developers"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "httpx>=0.28.1",
+]
+
+[project.optional-dependencies]
+onepassword = [
+    "onepassword-sdk>=0.4.1",
+]
 
 [build-system]
 requires = ["uv_build>=0.8.0,<0.12"]
 build-backend = "uv_build"
 
 [tool.pytest.ini_options]
+asyncio_mode = "auto"
 markers = [
     "real_camera: needs a real Token, Credentials and Camera; run with `make test_real_cameras`",
 ]
@@ -24,6 +32,7 @@ convention = "google"
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
     "ruff>=0.16.10",
     "ty>=0.0.85",
 ]

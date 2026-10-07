@@ -13,7 +13,7 @@ test_real_cameras:
 check:
 	uv run ruff format --check .
 	uv run ruff check .
-	uv run ty check
+	uv run --extra onepassword ty check
 
 # Build the wheel and source package into dist/ for other projects to install.
 build:
