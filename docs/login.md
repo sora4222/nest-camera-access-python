@@ -57,7 +57,8 @@ By default the package starts a browser login when it needs a Token and has none
 ## If Login fails
 
 - **"doesn't comply with Google's OAuth 2.0 policy"** or **redirect_uri_mismatch**: the redirect URI in the error is not on your OAuth client. Add it exactly as shown, wait a few minutes, and try again.
-- **The browser page never finishes loading**: use `gnc.login("server")` instead and paste the google.com address.
+- **The browser page never finishes loading after you allow access**: on Google's permission page, leave the options for events and event snapshots off. This package does not use events, and those options need a Pub/Sub setup the package does not make. Turn on only access to your Cameras.
+- **It still never finishes**: use `gnc.login("server")` instead and paste the google.com address.
 
 ## Real camera tests (developers of this package)
 
