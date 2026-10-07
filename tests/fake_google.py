@@ -66,10 +66,18 @@ class FakeGoogle:
         """Short names of the commands seen so far, in order."""
         return [name for name, _ in self.commands]
 
+    def generate_count(self) -> int:
+        """How many Streams were asked for."""
+        return self.command_names().count("GenerateWebRtcStream")
+
     async def close(self) -> None:
         """Close every fake peer."""
         for peer in self.peers:
             await peer.close()
+
+    async def drop(self) -> None:
+        """Drop every open connection, like a Wi-Fi blip."""
+        await self.close()
 
     async def _handle(self, request: httpx.Request) -> httpx.Response:
         if request.url.host == "oauth2.googleapis.com":

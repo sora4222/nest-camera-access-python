@@ -84,6 +84,7 @@ class Camera:
         *,
         queue_size: int = 100,
         on_full: OnFull = "raise",
+        retries: int = 3,
     ) -> Stream:
         """Open a live Stream; use it in a ``with`` block.
 
@@ -101,8 +102,11 @@ class Camera:
                 ``"raise"`` makes ``frames()`` raise ``StreamError``;
                 ``"drop_oldest"`` drops the oldest, warns once and counts in
                 ``stream.dropped``.
+            retries: How many times in a row to reconnect after the
+                connection drops. After the last failed try, ``frames()``
+                raises ``StreamError``.
         """
-        return Stream(self._run_command(), frames, queue_size, on_full)
+        return Stream(self._run_command(), frames, queue_size, on_full, retries)
 
     def stream_async(
         self,
@@ -110,9 +114,10 @@ class Camera:
         *,
         queue_size: int = 100,
         on_full: OnFull = "raise",
+        retries: int = 3,
     ) -> AsyncStream:
         """Async version of ``stream``; use it in an ``async with`` block."""
-        return AsyncStream(self._run_command(), frames, queue_size, on_full)
+        return AsyncStream(self._run_command(), frames, queue_size, on_full, retries)
 
     def _run_command(self) -> RunCommand:
         if self.nest is None:
