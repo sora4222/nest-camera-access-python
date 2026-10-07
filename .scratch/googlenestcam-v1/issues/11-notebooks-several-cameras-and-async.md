@@ -4,8 +4,10 @@
 
 **Blocked by:** 08
 
-**Status:** ready-for-agent
+**Status:** ready-for-human
 
-- [ ] Saved with no outputs, Tokens or Camera IDs.
-- [ ] Notebook 6 shows two Streams open at the same time.
+- [x] Saved with no outputs, Tokens or Camera IDs.
+- [x] Notebook 6 shows two Streams open at the same time.
 - [ ] Each runs top to bottom with real Cameras.
+
+**Notes:** Notebooks are `notebooks/06-several-cameras.ipynb` (needs two Cameras) and `notebooks/07-async.ipynb`. There were no real Cameras when these were built, so they were not run; a human must run both top to bottom and save them again with no outputs.

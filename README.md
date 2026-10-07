@@ -5,7 +5,7 @@ Get pictures and sound from your Google Nest Cameras in a few lines of Python, r
 The package handles Google login, the Nest WebRTC live stream, and turning video into NumPy arrays.
 
 - [Login](docs/login.md): Google setup and logging in
-- Notebooks (`pip install "googlenestcam[notebooks]"`): [Quick start](notebooks/01-quick-start.ipynb), [Live view](notebooks/02-live-view.ipynb), [OpenCV, PyTorch and TensorFlow](notebooks/03-machine-learning.ipynb), [Server login](notebooks/04-server-login.ipynb)
+- Notebooks (`pip install "googlenestcam[notebooks]"`): [Quick start](notebooks/01-quick-start.ipynb), [Live view](notebooks/02-live-view.ipynb), [OpenCV, PyTorch and TensorFlow](notebooks/03-machine-learning.ipynb), [Server login](notebooks/04-server-login.ipynb), [Audio](notebooks/05-audio.ipynb), [Several Cameras](notebooks/06-several-cameras.ipynb), [Async](notebooks/07-async.ipynb)
 - [Design](docs/design.md): what version 1 does and how it is used
 - [Glossary](GLOSSARY.md): the words used in code and docs
 - [Decisions](docs/adr/): why some choices were made
