@@ -52,6 +52,11 @@ Setup steps: [login.md](login.md).
 - When the connection drops, the Stream reconnects a set number of times, then raises an error.
 - Only Cameras that stream over WebRTC are supported. Older RTSP cameras are not.
 
+## Snapshots
+
+- `cam.snapshot(timeout=20)` starts a Stream, waits for one Frame, then stops it, also on error or timeout. It is slow, so open a Stream when you need many Frames.
+- If no Frame arrives in time, it raises `SnapshotTimeoutError`.
+
 ## Not in version 1
 
 Events (motion, person, doorbell) through Google Pub/Sub. Pub/Sub costs money, so it is low priority.

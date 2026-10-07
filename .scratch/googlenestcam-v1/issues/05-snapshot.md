@@ -4,11 +4,11 @@
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** ready-for-human (PR open; real Camera test not yet run)
 
-- [ ] Returns one Frame.
-- [ ] The Stream is always stopped at Google, even on error or timeout.
-- [ ] Clear timeout error if no Frame arrives; timeout can be set.
-- [ ] Docstring and design doc say it is slow.
-- [ ] Unit tests with the fake-Google kit; one `real_camera` test.
-- [ ] `make check` and `make test` pass.
+- [x] Returns one Frame.
+- [x] The Stream is always stopped at Google, even on error or timeout.
+- [x] Clear timeout error if no Frame arrives; timeout can be set.
+- [x] Docstring and design doc say it is slow.
+- [x] Unit tests with the fake-Google kit; `real_camera` test written but not yet run.
+- [x] `make check` and `make test` pass.
