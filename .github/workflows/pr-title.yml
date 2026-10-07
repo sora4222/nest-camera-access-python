@@ -1,0 +1,28 @@
+name: PR title
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+  # The ruff-fix job in ci.yml starts this after it pushes fixes.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  pr-title:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Check the title is a lowercase Conventional Commit
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          BRANCH: ${{ github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ -z "$TITLE" ]; then
+            TITLE=$(gh pr view "$BRANCH" --json title --jq .title)
+          fi
+          uv run --no-project scripts/check_pr_title.py "$TITLE"

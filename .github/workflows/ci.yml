@@ -4,17 +4,58 @@ on:
   pull_request:
   push:
     branches: [main]
+  # The ruff-fix job starts this after it pushes fixes.
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
+  ruff-fix:
+    # Only branches in this repo; a fork's token cannot push.
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+    outputs:
+      pushed: ${{ steps.push.outputs.pushed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --locked
+      - run: uv run ruff format .
+      - run: uv run ruff check --fix --exit-zero .
+      - id: push
+        env:
+          BRANCH: ${{ github.head_ref }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet; then
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "style: apply ruff format and lint fixes"
+          git push origin "HEAD:$BRANCH"
+          # A push made with this token starts no runs, so start the checks for the new commit.
+          gh workflow run ci.yml --ref "$BRANCH"
+          gh workflow run pr-title.yml --ref "$BRANCH"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
   check-and-test:
+    needs: ruff-fix
+    # Skipped when ruff-fix pushed; the run it started checks the fixed commit.
+    if: ${{ !cancelled() && needs.ruff-fix.outputs.pushed != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
       - run: uv sync --locked
       - run: make check
+      # Every test that runs without a real Camera.
       - run: make test
       - run: make build
