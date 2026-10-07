@@ -16,6 +16,7 @@ Keep things simple, developer should be able to access images, the WebRTC and Go
 6. Take a Test Driven Development approach.
 7. Commit as small changes to the repo are created, use a commit type, subject and what the commit does. accept commit types such as `feat`, `fix`, `chore`.
 8. Make this repository so it won't interfere with other worktrees being tested or run on this computer.
+9. Private details/credentials must NEVER be disclosed to anything, make sure that they're not commited to the git repository, token.json and secrets are for checking the application works as expected, they are for e2e testing.
 
 Always ask questions when unclear.
 
