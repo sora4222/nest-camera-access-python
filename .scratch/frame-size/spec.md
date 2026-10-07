@@ -28,12 +28,16 @@ with cam.stream(size=(640, 360)) as s:
     for frame in s.frames():
         frame.image.shape  # (360, 640, 3)
 
+with cam.stream(size=720) as s:  # height 720, width keeps the shape
+    ...
+
 frame = cam.snapshot(size=(320, 180))
 ```
 
-- `size=(width, height)` on `stream()`, `stream_async()`, `snapshot()` and `snapshot_async()`.
+- `size=` on `stream()`, `stream_async()`, `snapshot()` and `snapshot_async()`.
+- A single number such as `480`, `720` or `1080` is the height. The width keeps the picture's shape, like "720p". Added at Jesse's request on PR #10.
 - Off by default (`size=None`): Frames keep the Camera's size.
-- The picture is stretched to exactly that size. The developer picks a size with the same shape as the Camera (most Nest Cameras are 16:9) to avoid stretching.
+- `(width, height)` stretches the picture to exactly that size. The developer picks a size with the same shape as the Camera (most Nest Cameras are 16:9) to avoid stretching.
 - Resizing is done by PyAV (already installed with aiortc) while it turns the video into RGB, in one step, off the event loop. No new dependency.
 
 ## User Stories
@@ -45,16 +49,15 @@ frame = cam.snapshot(size=(320, 180))
 
 ## Implementation Decisions
 
-- The decoder turns each video frame into RGB with `to_ndarray(width=..., height=..., format="rgb24")` when a size is set.
+- The decoder turns each video frame into RGB with `to_ndarray(width=..., height=..., format="rgb24")` when a size is set. For a single number, the width is worked out from each frame's own shape.
 - The size is passed from `Camera` to the Stream or Snapshot, then to each WebRTC session, so reconnects keep it.
-- A size must be two whole numbers, each at least 1. Otherwise `ValueError` is raised when `stream()` or `snapshot()` is called.
+- A size must be one whole number, or two, each at least 1. Otherwise `ValueError` is raised when `stream()` or `snapshot()` is called.
 
 ## Testing Decisions
 
-- Through the public API, against the fake Google: a Stream and a Snapshot with `size` give Frames of that shape and still red; with no `size`, Frames keep the fake Camera's size; a bad size raises `ValueError`.
+- Through the public API, against the fake Google: a Stream and a Snapshot with `size` give Frames of that shape and still red; a single number gives that height with the shape kept; with no `size`, Frames keep the fake Camera's size; a bad size raises `ValueError`.
 
 ## Out of Scope
 
 - Asking Google for a smaller stream (not possible today, see Research).
-- Keeping the shape automatically (for example, only a width). Can be added later if wanted.
 - Cropping.

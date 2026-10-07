@@ -43,6 +43,14 @@ def test_resize_survives_a_reconnect(camera, google) -> None:
     assert_red_and_small(frame.image)
 
 
+def test_one_number_is_the_height_and_keeps_the_shape(camera) -> None:
+    """``size=24`` on a 64 x 48 Camera gives 32 x 24, like "720p"."""
+    with camera.stream(size=HEIGHT // 2) as stream:
+        image = next(stream.frames()).image
+    assert image.shape == (HEIGHT // 2, WIDTH // 2, 3)
+    assert camera.snapshot(size=HEIGHT // 2).image.shape == image.shape
+
+
 def test_no_size_keeps_the_camera_size(camera) -> None:
     """Without ``size`` Frames come at the Camera's size."""
     with camera.stream() as stream:
@@ -63,7 +71,9 @@ async def test_async_calls_resize(camera) -> None:
             break
 
 
-@pytest.mark.parametrize("size", [(0, 10), (10, -1), (10.5, 10), (10,), "640x360"])
+@pytest.mark.parametrize(
+    "size", [(0, 10), (10, -1), (10.5, 10), (10,), "640x360", 0, -720, 720.0, True]
+)
 def test_bad_size_is_a_clear_error(camera, google, size) -> None:
     """A bad size raises before any Stream starts."""
     with pytest.raises(ValueError, match="size"):

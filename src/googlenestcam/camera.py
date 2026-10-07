@@ -66,12 +66,12 @@ class Camera:
 
         Args:
             timeout: Seconds to wait for the Frame once the Stream starts.
-            size: Resize the Frame to ``(width, height)``; see ``stream()``.
+            size: Resize the Frame; see ``stream()``.
 
         Raises:
             SnapshotTimeoutError: If no Frame arrives in time.
             StreamError: If Google refuses to stream.
-            ValueError: If ``size`` is not two whole numbers of at least 1.
+            ValueError: If ``size`` is not a whole number, or two, of at least 1.
         """
         size = check_size(size)
         return background_loop.run(take_snapshot(self._run_command(), timeout, size))
@@ -116,13 +116,14 @@ class Camera:
             retries: How many times in a row to reconnect after the
                 connection drops. After the last failed try, ``frames()``
                 raises ``StreamError``.
-            size: Resize every Frame to ``(width, height)``, for example
-                ``(640, 360)``, so later steps run faster. Google cannot send
-                a smaller video, so this is done here. ``None`` keeps the
-                Camera's size.
+            size: Resize every Frame so later steps run faster. A number such
+                as ``720`` is the height, and the width keeps the shape.
+                ``(640, 360)`` gives exactly that width and height. Google
+                cannot send a smaller video, so this is done here. ``None``
+                keeps the Camera's size.
 
         Raises:
-            ValueError: If ``size`` is not two whole numbers of at least 1.
+            ValueError: If ``size`` is not a whole number, or two, of at least 1.
         """
         size = check_size(size)
         return Stream(self._run_command(), frames, queue_size, on_full, retries, size)

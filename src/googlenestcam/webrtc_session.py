@@ -17,7 +17,7 @@ from av import VideoFrame
 
 from googlenestcam.errors import GoogleApiError, StreamError
 from googlenestcam.frame import Frame, Image
-from googlenestcam.frame_size import Size
+from googlenestcam.frame_size import Size, target_size
 from googlenestcam.webrtc_offer import create_peer_connection, fix_google_answer
 
 type RunCommand = Callable[[str, dict[str, Any]], Awaitable[dict[str, Any]]]
@@ -35,7 +35,7 @@ def parse_google_time(value: str) -> datetime:
 def _rgb(frame: VideoFrame, size: Size | None) -> Image:
     if size is None:
         return cast(Image, frame.to_ndarray(format="rgb24"))
-    width, height = size
+    width, height = target_size(size, frame.width, frame.height)
     return cast(Image, frame.to_ndarray(width=width, height=height, format="rgb24"))
 
 
@@ -55,7 +55,8 @@ class WebRtcSession:
             run_command: Runs a ``CameraLiveStream`` command for this Camera.
             on_frame: Called with each new Frame.
             on_error: Called once the session stops working.
-            size: Resize each Frame to ``(width, height)``; ``None`` keeps it.
+            size: Resize each Frame to this height or ``(width, height)``;
+                ``None`` keeps it.
         """
         self._run_command = run_command
         self._on_frame = on_frame
