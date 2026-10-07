@@ -4,12 +4,12 @@
 
 **Blocked by:** none
 
-**Status:** ready-for-agent
+**Status:** ready-for-human
 
-- [ ] Stream Frames have the asked size; reconnects keep it.
-- [ ] Snapshot Frames have the asked size.
-- [ ] No `size` keeps the Camera's size.
-- [ ] Bad sizes raise `ValueError`.
-- [ ] Docs: design.md and GLOSSARY.md.
-- [ ] Unit tests.
-- [ ] `make check` and `make test` pass.
+- [x] Stream Frames have the asked size; reconnects keep it.
+- [x] Snapshot Frames have the asked size.
+- [x] No `size` keeps the Camera's size.
+- [x] Bad sizes raise `ValueError`.
+- [x] Docs: design.md and GLOSSARY.md.
+- [x] Unit tests.
+- [x] `make check` and `make test` pass.
