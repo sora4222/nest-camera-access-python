@@ -1,5 +1,6 @@
 """Tests for catching Google's redirect on this machine."""
 
+import socket
 import threading
 
 import httpx
@@ -41,3 +42,15 @@ def test_timeout_raises_login_error() -> None:
     with RedirectReceiver(port=0) as receiver:
         with pytest.raises(LoginError, match="timed out"):
             receiver.wait(timeout=0.1)
+
+
+def test_idle_browser_connection_does_not_block_the_redirect() -> None:
+    """Browsers open spare connections early; the redirect still gets through."""
+    with RedirectReceiver(port=0) as receiver:
+        port = int(receiver.redirect_uri.rsplit(":", 1)[1])
+        with socket.create_connection(("127.0.0.1", port)):
+            url = f"{receiver.redirect_uri}/?code=abc&state=s"
+            thread = threading.Thread(target=httpx.get, args=(url,), daemon=True)
+            thread.start()
+            address = receiver.wait(timeout=2)
+    assert address.endswith("/?code=abc&state=s")

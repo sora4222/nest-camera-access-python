@@ -1,7 +1,7 @@
 """Catch Google's Login redirect on a local web server."""
 
 import threading
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from types import TracebackType
 from typing import Self
 
@@ -18,7 +18,7 @@ class RedirectReceiver:
         self._port = port
         self._address: str | None = None
         self._received = threading.Event()
-        self._server: HTTPServer | None = None
+        self._server: ThreadingHTTPServer | None = None
 
     @property
     def redirect_uri(self) -> str:
@@ -28,7 +28,11 @@ class RedirectReceiver:
         return f"http://localhost:{self._server.server_port}"
 
     def __enter__(self) -> Self:
-        """Start listening on 127.0.0.1 only."""
+        """Start listening on 127.0.0.1 only.
+
+        One thread per connection, so a spare connection a browser opens early
+        cannot block the redirect.
+        """
         receiver = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -47,7 +51,7 @@ class RedirectReceiver:
                 pass
 
         try:
-            self._server = HTTPServer(("127.0.0.1", self._port), Handler)
+            self._server = ThreadingHTTPServer(("127.0.0.1", self._port), Handler)
         except OSError as error:
             raise LoginError(f"Cannot listen on port {self._port}: {error}") from error
         threading.Thread(target=self._server.serve_forever, daemon=True).start()
