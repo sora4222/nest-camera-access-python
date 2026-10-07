@@ -1,5 +1,6 @@
 """Quick access to Google Nest Cameras for Python developers."""
 
+from googlenestcam.audio_chunk import AudioChunk
 from googlenestcam.camera import Camera
 from googlenestcam.credentials import Credentials, load_credentials
 from googlenestcam.default_nest import (
@@ -28,6 +29,7 @@ from googlenestcam.stream import AsyncStream, Stream
 
 __all__ = [
     "AsyncStream",
+    "AudioChunk",
     "Camera",
     "CameraNotFoundError",
     "Credentials",
