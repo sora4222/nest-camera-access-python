@@ -6,15 +6,18 @@ This module should be handling the authentication, the Google Nest WebRTC, and a
 
 ## Development rules
 
-Keep things simple, the user should be able to access images, the WebRTC and the cameras other abilities in as few lines as possible.
+Keep things simple, developer should be able to access images, the WebRTC and Google Nest Cameras other abilities in as few lines as possible.
 
 1. Python files, functions and classes must always be kept single responsibility.
 2. Write docstring for files and public functions. Documentation must be kept concise.
 3. The README.md should link to other files and only address what the module does, and the basics of how it does it. More complex instructions should be in docstrings or the `docs/`.
-4. Keep typing clean and target Python 3.12+
-5. May install other dependencies, but keep this short and the code secure
-6. Take a Test Driven Development approach
+4. Keep typing clean and target Python 3.12+.
+5. May install other dependencies, but keep this module small and the code secure. Ask questions if it unclear whether to install dependencies.
+6. Take a Test Driven Development approach.
+7. Commit as small changes to the repo are created, use a commit type, subject and what the commit does. accept commit types such as `feat`, `fix`, `chore`.
+8. Make this repository so it won't interfere with other worktrees being tested or run on this computer.
 
+Always ask questions when unclear.
 
 ## Python tooling
 
@@ -27,5 +30,5 @@ Use uv for every Python command in this project.
 - For a standalone script, use `uv run script.py` and add its dependencies with
   `uv add --script script.py <package>`.
 
-Use `ruff` for formatting and linting Python files, and `ty` for static type checking
-Pytest should be used for testing
+Use `ruff` for formatting and linting Python files, and `ty` for static type checking.
+Pytest should be used for testing.
