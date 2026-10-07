@@ -1,7 +1,5 @@
 """One picture from a Camera."""
 
-from __future__ import annotations
-
 from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
@@ -35,7 +33,7 @@ class Frame:
             return self.image
         return np.array(self.image, dtype=dtype, copy=copy)
 
-    def to_pil(self) -> PilImage:
+    def to_pil(self) -> "PilImage":
         """Return the picture as a Pillow RGB image. Needs ``googlenestcam[images]``."""
         return pillow_image.to_pil(self.image)
 

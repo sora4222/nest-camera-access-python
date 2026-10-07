@@ -4,8 +4,6 @@ Pillow comes from the ``googlenestcam[images]`` extra and is imported only here,
 inside the functions, so ``import googlenestcam`` works without it.
 """
 
-from __future__ import annotations
-
 import io
 from types import ModuleType
 from typing import TYPE_CHECKING
@@ -30,7 +28,7 @@ def _pillow() -> ModuleType:
     return Image
 
 
-def to_pil(image: npt.NDArray[np.uint8]) -> PilImage:
+def to_pil(image: npt.NDArray[np.uint8]) -> "PilImage":
     """Return an H x W x 3 RGB uint8 array as a Pillow RGB image."""
     return _pillow().fromarray(image)
 
