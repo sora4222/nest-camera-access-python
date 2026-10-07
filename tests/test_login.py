@@ -1,6 +1,7 @@
 """Tests for the one-time Login."""
 
 import importlib
+import socket
 import threading
 from typing import cast
 from urllib.parse import parse_qs, urlparse
@@ -99,3 +100,59 @@ def test_unknown_mode_is_rejected(tmp_path) -> None:
     """A mistyped mode gives a clear error."""
     with pytest.raises(ValueError, match="browser"):
         login(cast(LoginMode, "other"), credentials=CREDENTIALS)
+
+
+def _free_port() -> int:
+    with socket.socket() as sock:
+        sock.bind(("127.0.0.1", 0))
+        return sock.getsockname()[1]
+
+
+def test_browser_login_uses_given_redirect_uri(exchanged, tmp_path) -> None:
+    """A given redirect URI is sent to Google, and the server listens on ``port``."""
+    port = _free_port()
+    redirect_uri = f"http://127.0.0.1:{port}/callback"
+
+    def fake_browser(url: str) -> bool:
+        query = _query(url)
+        assert query["redirect_uri"] == redirect_uri
+        redirect = f"{query['redirect_uri']}?code=abc&state={query['state']}"
+        threading.Thread(target=httpx.get, args=(redirect,)).start()
+        return True
+
+    login(
+        token_path=tmp_path / "token.json",
+        port=port,
+        redirect_uri=redirect_uri,
+        open_url=fake_browser,
+        show=lambda _: None,
+        credentials=CREDENTIALS,
+    )
+    assert exchanged == {"code": "abc", "redirect_uri": redirect_uri}
+
+
+def test_server_login_uses_given_redirect_uri(exchanged, tmp_path) -> None:
+    """Server login can send Google to another web application."""
+    shown: list[str] = []
+    redirect_uri = "https://example.com/nest"
+
+    def paste(_: str) -> str:
+        query = _query(shown[-1])
+        assert query["redirect_uri"] == redirect_uri
+        return f"{redirect_uri}?code=abc&state={query['state']}"
+
+    login(
+        "server",
+        redirect_uri=redirect_uri,
+        token_path=tmp_path / "token.json",
+        show=shown.append,
+        ask=paste,
+        credentials=CREDENTIALS,
+    )
+    assert exchanged == {"code": "abc", "redirect_uri": redirect_uri}
+
+
+def test_redirect_uri_must_be_a_web_address() -> None:
+    """A redirect URI that is not http or https gives a clear error."""
+    with pytest.raises(ValueError, match="redirect_uri"):
+        login(redirect_uri="localhost:8080", credentials=CREDENTIALS)
