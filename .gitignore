@@ -222,3 +222,6 @@ __marimo__/
 # googlenestcam credentials (never commit)
 token.json
 .env.secret
+
+# Agent worktrees (other checkouts of this repo)
+.claude/worktrees/
