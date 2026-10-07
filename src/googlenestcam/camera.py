@@ -4,6 +4,9 @@ from dataclasses import dataclass, field
 from functools import partial
 from typing import TYPE_CHECKING, Any, Self
 
+from googlenestcam import background_loop
+from googlenestcam.frame import Frame
+from googlenestcam.snapshot import take_snapshot
 from googlenestcam.stream import AsyncStream, Stream
 from googlenestcam.webrtc_session import RunCommand
 
@@ -51,6 +54,27 @@ class Camera:
             room=room,
             kind=device.get("type", "").removeprefix(TYPE_PREFIX).lower() or "camera",
             nest=nest,
+        )
+
+    def snapshot(self, timeout: float = 20) -> Frame:
+        """Take one Frame.
+
+        This is slow: it starts a Stream, waits for one Frame and stops it.
+        Open a ``stream()`` when you need many Frames.
+
+        Args:
+            timeout: Seconds to wait for the Frame once the Stream starts.
+
+        Raises:
+            SnapshotTimeoutError: If no Frame arrives in time.
+            StreamError: If Google refuses to stream.
+        """
+        return background_loop.run(take_snapshot(self._run_command(), timeout))
+
+    async def snapshot_async(self, timeout: float = 20) -> Frame:  # noqa: ASYNC109
+        """Async version of ``snapshot``."""
+        return await background_loop.run_async(
+            take_snapshot(self._run_command(), timeout)
         )
 
     def stream(self) -> Stream:

@@ -39,3 +39,9 @@ def test_streams_frames_from_a_real_camera(nest) -> None:
     height, width, colours = frames[0].image.shape
     print(f"{camera.name!r}: {width}x{height} at {frames[0].time}")
     assert colours == 3
+
+
+def test_snapshot_from_a_real_camera(nest) -> None:
+    """A Snapshot gives one Frame from the first Camera."""
+    frame = nest.list_cameras()[0].snapshot()
+    assert frame.image.ndim == 3

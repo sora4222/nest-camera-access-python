@@ -35,3 +35,7 @@ class CameraNotFoundError(GoogleNestCamError):
 
 class StreamError(GoogleNestCamError):
     """A Stream could not start or stopped working."""
+
+
+class SnapshotTimeoutError(StreamError, TimeoutError):
+    """No Frame arrived in time for a Snapshot."""

@@ -16,6 +16,7 @@ from googlenestcam.errors import (
     MissingTokenError,
     GoogleApiError,
     OnePasswordError,
+    SnapshotTimeoutError,
     StreamError,
     TokenError,
 )
@@ -37,6 +38,7 @@ __all__ = [
     "MissingTokenError",
     "Nest",
     "OnePasswordError",
+    "SnapshotTimeoutError",
     "Stream",
     "StreamError",
     "TokenError",
