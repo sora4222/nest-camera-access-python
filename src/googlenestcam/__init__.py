@@ -1,5 +1,7 @@
 """Quick access to Google Nest Cameras for Python developers."""
 
+import logging
+
 from googlenestcam.camera import Camera
 from googlenestcam.credentials import Credentials, load_credentials
 from googlenestcam.default_nest import (
@@ -25,6 +27,9 @@ from googlenestcam.frame import Frame
 from googlenestcam.login import login
 from googlenestcam.nest import Nest
 from googlenestcam.stream import AsyncStream, Stream
+
+# Libraries add no output; the developer's logging config decides.
+logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 __all__ = [
     "AsyncStream",

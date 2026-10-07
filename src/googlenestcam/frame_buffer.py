@@ -1,7 +1,7 @@
 """Hold Frames between the Stream and the reader (Latest and Every-frame mode)."""
 
+import logging
 import threading
-import warnings
 from collections import deque
 from typing import Literal, Self
 
@@ -10,12 +10,14 @@ from googlenestcam.frame import Frame
 
 type OnFull = Literal["raise", "drop_oldest"]
 
+logger = logging.getLogger(__name__)
+
 
 class FrameBuffer:
     """A bounded ``deque`` of Frames, readable from any thread."""
 
     def __init__(
-        self, size: int = 100, on_full: OnFull = "raise", *, warn: bool = True
+        self, size: int = 100, on_full: OnFull = "raise", *, log_drops: bool = True
     ) -> None:
         """Start empty.
 
@@ -23,14 +25,14 @@ class FrameBuffer:
             size: The most unread Frames kept.
             on_full: ``"raise"`` makes the next read raise ``StreamError``;
                 ``"drop_oldest"`` drops the oldest Frame.
-            warn: Warn once and count drops in ``dropped``.
+            log_drops: Log and count drops in ``dropped``.
         """
         if size < 1:
             raise ValueError("queue_size must be at least 1")
         if on_full not in ("raise", "drop_oldest"):
             raise ValueError('on_full must be "raise" or "drop_oldest"')
         self._on_full = on_full
-        self._warn = warn
+        self._log_drops = log_drops
         self._frames: deque[Frame] = deque(maxlen=size)
         self._dropped = 0
         self._error: Exception | None = None
@@ -40,7 +42,7 @@ class FrameBuffer:
     @classmethod
     def latest(cls) -> Self:
         """A one-Frame buffer where each new Frame quietly replaces the old one."""
-        return cls(1, "drop_oldest", warn=False)
+        return cls(1, "drop_oldest", log_drops=False)
 
     @property
     def dropped(self) -> int:
@@ -51,28 +53,30 @@ class FrameBuffer:
         """Add ``frame``, handling a full buffer as set by ``on_full``."""
         with self._changed:
             if len(self._frames) == self._frames.maxlen:
-                if self._on_full == "raise":
-                    self._error = StreamError(
-                        f"The Frame queue is full ({self._frames.maxlen} Frames); "
-                        "your code is reading too slowly. Set a bigger "
-                        'queue_size, or on_full="drop_oldest".'
-                    )
-                    self._changed.notify_all()
-                    return
-                if self._warn:
-                    self._count_drop()
-            self._frames.append(frame)  # deque drops the oldest when full
+                self._handle_full()
+            if self._error is None:
+                self._frames.append(frame)  # deque drops the oldest when full
             self._changed.notify_all()
 
-    def _count_drop(self) -> None:
-        self._dropped += 1
-        if self._dropped == 1:
-            warnings.warn(
-                "Frames are being dropped because your code reads too "
-                "slowly; see stream.dropped for the count",
-                UserWarning,
-                stacklevel=3,
+    def _handle_full(self) -> None:
+        """Fail the reader for ``"raise"``; otherwise log the coming drop."""
+        if self._on_full == "raise":
+            self._error = StreamError(
+                f"The Frame queue is full ({self._frames.maxlen} Frames); "
+                "your code is reading too slowly. Set a bigger "
+                'queue_size, or on_full="drop_oldest".'
             )
+            return
+        if not self._log_drops:
+            return
+        self._dropped += 1
+        level = logging.WARNING if self._dropped == 1 else logging.DEBUG
+        logger.log(
+            level,
+            "Frame dropped because your code reads too slowly "
+            "(%d so far; see stream.dropped)",
+            self._dropped,
+        )
 
     def fail(self, error: Exception) -> None:
         """Make the next read raise ``error``."""
