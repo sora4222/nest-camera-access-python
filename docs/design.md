@@ -29,6 +29,9 @@ Async versions: `await cam.snapshot_async()` and `async with cam.stream_async()`
 
 ## Login and Credentials
 
+Setup steps: [login.md](login.md).
+
+
 - **Credentials** come from code arguments or environment variables. 1Password is an optional extra; if it is missing or fails, the package falls back to code or environment values and only raises a clear error when nothing works. It never fails on import.
 - The **Token** is saved in the user config folder (`~/.config/googlenestcam/token.json`), never the project folder. The path can be changed in code or with an environment variable.
 - When no Token exists, `login()` opens a browser by default. The developer can instead ask for an error, or for **Server login**. See [ADR 0001](adr/0001-server-login-pastes-an-address.md).
