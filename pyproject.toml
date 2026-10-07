@@ -1,7 +1,7 @@
 [project]
-name = "nest-camera-access-python"
+name = "googlenestcam"
 version = "0.1.0"
-description = "Add your description here"
+description = "Quick access to Google Nest Cameras for Python developers"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = []
