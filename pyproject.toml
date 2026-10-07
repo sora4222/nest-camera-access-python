@@ -19,6 +19,7 @@ build-backend = "uv_build"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+pythonpath = ["."]
 markers = [
     "real_camera: needs a real Token, Credentials and Camera; run with `make test_real_cameras`",
 ]

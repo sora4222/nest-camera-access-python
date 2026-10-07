@@ -37,6 +37,10 @@ _Avoid_: Packet, buffer, clip
 
 ## Access
 
+**Nest**:
+The developer's access to one Google account, through which Cameras are found.
+_Avoid_: Client, account, session, home
+
 **Credentials**:
 The OAuth client ID, client secret and Device Access project ID the developer supplies, directly or through a secret manager.
 _Avoid_: Secrets, keys, config

@@ -25,7 +25,14 @@ with cam.stream(frames="all", audio=False) as s:  # Every-frame mode
     ...
 ```
 
-Async versions: `await cam.snapshot_async()` and `async with cam.stream_async()`. See [ADR 0002](adr/0002-sync-api-over-background-event-loop.md).
+To pass settings in code instead of environment variables, make a **Nest**:
+
+```python
+nest = gnc.Nest(token_path="token.json", on_missing_token="raise")
+cam = nest.camera("Front door")
+```
+
+Async versions: `await gnc.list_cameras_async()`, `await gnc.camera_async(...)`, `await cam.snapshot_async()` and `async with cam.stream_async()`. See [ADR 0002](adr/0002-sync-api-over-background-event-loop.md).
 
 ## Login and Credentials
 

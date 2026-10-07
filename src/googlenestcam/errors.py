@@ -23,3 +23,11 @@ class TokenError(GoogleNestCamError):
 
 class MissingTokenError(TokenError):
     """No Token exists yet; run ``googlenestcam.login()``."""
+
+
+class GoogleApiError(GoogleNestCamError):
+    """Google's Smart Device Management API refused a request."""
+
+
+class CameraNotFoundError(GoogleNestCamError):
+    """No single Camera matches the given name or ID."""
