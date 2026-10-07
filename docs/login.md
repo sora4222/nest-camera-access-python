@@ -5,7 +5,7 @@ You log in once. The package then keeps the Token and gets fresh access on its o
 ## 1. Google setup (once)
 
 1. Follow Google's [Device Access get started guide](https://developers.google.com/nest/device-access/get-started) to make a Google Cloud project and a Device Access project.
-2. In Google Cloud, make an OAuth client of type **Web application** with these redirect URIs:
+2. In Google Cloud, make an OAuth client of type **Web application** with these redirect URIs, typed exactly (Google rejects any difference, such as a missing `www.` or port):
    - `https://www.google.com` (for Server login)
    - `http://localhost:8080` (for browser login and SSH tunnels)
 3. Note the client ID, client secret and Device Access project ID.
@@ -53,6 +53,12 @@ Pick one:
 ## When there is no Token
 
 By default the package starts a browser login when it needs a Token and has none. To get a `MissingTokenError` instead, pass `on_missing_token="raise"`.
+
+## If Login fails
+
+- **"doesn't comply with Google's OAuth 2.0 policy"** or **redirect_uri_mismatch**: the redirect URI in the error is not on your OAuth client. Add it exactly as shown, wait a few minutes, and try again.
+- **The browser page never finishes loading after you allow access**: on Google's permission page, leave the options for events and event snapshots off. This package does not use events, and those options need a Pub/Sub setup the package does not make. Turn on only access to your Cameras.
+- **It still never finishes**: use `gnc.login("server")` instead and paste the google.com address.
 
 ## Real camera tests (developers of this package)
 
