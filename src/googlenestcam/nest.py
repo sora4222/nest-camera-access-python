@@ -54,15 +54,17 @@ class Nest:
 
     async def _http(self) -> httpx.AsyncClient:
         if self._client is None:
-            self._client = httpx.AsyncClient(timeout=20, transport=self._transport)
+            self._client = httpx.AsyncClient(
+                base_url=sdm.API_URL,
+                auth=self._auth,
+                timeout=20,
+                transport=self._transport,
+            )
         return self._client
-
-    async def _access_token(self) -> str:
-        return await self._auth.access_token(await self._http())
 
     async def _list_cameras(self) -> list[Camera]:
         devices = await sdm.list_devices(
-            await self._http(), await self._access_token(), self.credentials.project_id
+            await self._http(), self.credentials.project_id
         )
         cameras = (Camera.from_device(device, self) for device in devices)
         return [camera for camera in cameras if camera is not None]
@@ -71,9 +73,7 @@ class Nest:
         self, device_id: str, command: str, params: dict[str, Any]
     ) -> dict[str, Any]:
         """Run a device command on the background loop; see ``sdm.execute_command``."""
-        return await sdm.execute_command(
-            await self._http(), await self._access_token(), device_id, command, params
-        )
+        return await sdm.execute_command(await self._http(), device_id, command, params)
 
     async def _camera(self, name_or_id: str) -> Camera:
         return find_camera(await self._list_cameras(), name_or_id)
