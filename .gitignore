@@ -225,3 +225,6 @@ token.json
 
 # Agent worktrees (other checkouts of this repo)
 .claude/worktrees/
+
+# YOLO model files the notebooks download
+*.pt
