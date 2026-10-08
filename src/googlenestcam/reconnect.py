@@ -5,7 +5,7 @@ from collections.abc import Callable
 from contextlib import suppress
 
 from googlenestcam.audio_chunk import AudioChunk
-from googlenestcam.errors import StreamError
+from googlenestcam.errors import CameraOffError, StreamError
 from googlenestcam.frame import Frame
 from googlenestcam.frame_size import Size
 from googlenestcam.webrtc_session import RunCommand, WebRtcSession
@@ -98,12 +98,12 @@ class ReconnectingSession:
                     return
                 except StreamError as new_error:
                     error = new_error
-            self._on_error(
-                StreamError(
-                    f"Gave up reconnecting after {self._retries} tries: {error}"
-                )
-                if self._retries
-                else error
-            )
+            self._on_error(self._gave_up(error))
         finally:
             self._reconnecting = None
+
+    def _gave_up(self, error: Exception) -> Exception:
+        if not self._retries:
+            return error
+        kind = CameraOffError if isinstance(error, CameraOffError) else StreamError
+        return kind(f"Gave up reconnecting after {self._retries} tries: {error}")
