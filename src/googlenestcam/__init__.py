@@ -13,6 +13,7 @@ from googlenestcam.default_nest import (
 )
 from googlenestcam.errors import (
     CameraNotFoundError,
+    CameraOffError,
     CredentialsError,
     GoogleNestCamError,
     LoginError,
@@ -37,6 +38,7 @@ __all__ = [
     "AudioChunk",
     "Camera",
     "CameraNotFoundError",
+    "CameraOffError",
     "Credentials",
     "CredentialsError",
     "Frame",

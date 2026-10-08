@@ -37,6 +37,14 @@ class StreamError(GoogleNestCamError):
     """A Stream could not start or stopped working."""
 
 
+class CameraOffError(StreamError):
+    """The Camera is turned off or offline, so Google will not stream it.
+
+    Google's API cannot tell if a Camera is on, or turn it on. Turn it on in
+    the Google Home app.
+    """
+
+
 class SnapshotTimeoutError(StreamError, TimeoutError):
     """No Frame arrived in time for a Snapshot."""
 

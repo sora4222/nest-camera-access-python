@@ -16,7 +16,7 @@ from aiortc.mediastreams import MediaStreamError, MediaStreamTrack
 from av import AudioFrame, VideoFrame
 
 from googlenestcam.audio_chunk import AudioChunk, Samples
-from googlenestcam.errors import GoogleApiError, StreamError
+from googlenestcam.errors import CameraOffError, GoogleApiError, StreamError
 from googlenestcam.frame import Frame, Image
 from googlenestcam.frame_size import Size, target_size
 from googlenestcam.webrtc_offer import create_peer_connection, fix_google_answer
@@ -25,6 +25,17 @@ type RunCommand = Callable[[str, dict[str, Any]], Awaitable[dict[str, Any]]]
 
 COMMAND = "sdm.devices.commands.CameraLiveStream."
 EXTEND_EARLY_SECONDS = 60
+CAMERA_OFF_MESSAGE = "not available for streaming"
+
+
+def refused_error(error: GoogleApiError) -> StreamError:
+    """Turn Google's refusal to start a Stream into a clear error."""
+    if CAMERA_OFF_MESSAGE in str(error):
+        return CameraOffError(
+            "The Camera is turned off or offline. Turn it on in the Google Home"
+            f" app, then try again. ({error})"
+        )
+    return StreamError(f"Google refused to start the Stream: {error}")
 
 
 def parse_google_time(value: str) -> datetime:
@@ -86,6 +97,7 @@ class WebRtcSession:
         """Ask Google for a session and connect to it.
 
         Raises:
+            CameraOffError: If the Camera is turned off or offline.
             StreamError: If Google refuses or the answer cannot be used.
         """
         self._connection, offer = await create_peer_connection()
@@ -100,7 +112,7 @@ class WebRtcSession:
             )
         except GoogleApiError as error:
             await self.close()
-            raise StreamError(f"Google refused to start the Stream: {error}") from error
+            raise refused_error(error) from error
         except BaseException:
             await self.close()
             raise
