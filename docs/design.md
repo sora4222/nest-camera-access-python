@@ -55,6 +55,7 @@ Setup steps: [login.md](login.md).
 - Frames have helpers to get a Pillow image or JPEG bytes.
 - **Frame size**: `cam.stream(size=720)` (height; width keeps the shape) or `size=(640, 360)` resizes every Frame before you get it, so later steps run faster. `snapshot()` takes `size` too. Google's API has no way to ask a Camera for a smaller video, so the package resizes. Off by default. See [the spec](../.scratch/frame-size/spec.md).
 - When the connection drops, the Stream starts a new session by itself, up to `retries` times in a row (3 by default, 1 second apart). The count resets once a Frame arrives. After the last failed try, `frames()` raises `StreamError`.
+- When a Camera is turned off (or offline), Google refuses with "The camera is not available for streaming." The package raises `CameraOffError`, a kind of `StreamError`, telling you to turn it on in the Google Home app. Google's API cannot report whether a Camera is on, or turn it on or off, so there are no methods for that ([camera traits](https://developers.google.com/nest/device-access/api/camera)).
 - Only Cameras that stream over WebRTC are supported. Older RTSP cameras are not.
 
 ## Audio
