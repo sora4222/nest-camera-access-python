@@ -33,6 +33,17 @@ gnc.login(
 )  # no browser: open the link on any device, then paste the google.com address
 ```
 
+To use another port or redirect address, pass `port=` and `redirect_uri=`. The address must be on your OAuth client.
+
+```python
+# Listen on, and redirect to, http://localhost:9000
+gnc.login(port=9000)
+# A tunnel address that reaches port 9000 on this machine
+gnc.login(port=9000, redirect_uri="https://my-tunnel.example.com")
+# Another web application: paste the address you land on
+gnc.login("server", redirect_uri="https://my-app.example.com/nest")
+```
+
 The Token file (only you can read it) is found in this order:
 
 1. `token_path=` in code, as text or a `Path`

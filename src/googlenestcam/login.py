@@ -26,6 +26,7 @@ def login(
     credentials: Credentials | None = None,
     token_path: TokenPath | None = None,
     port: int = 8080,
+    redirect_uri: str | None = None,
     timeout: float = 300,
     open_url: Callable[[str], bool] = webbrowser.open,
     show: Callable[[str], object] = print,
@@ -42,7 +43,14 @@ def login(
         project_id: Device Access project ID.
         credentials: Ready-made Credentials, instead of the three values.
         token_path: Where to save the Token; see ``find_token_path``.
-        port: Local port for ``"browser"`` mode.
+        port: Local port the ``"browser"`` mode server listens on.
+        redirect_uri: Where Google sends the browser after you approve. It
+            must be on your OAuth client. ``None`` uses
+            ``http://localhost:<port>`` in ``"browser"`` mode and
+            ``https://www.google.com`` in ``"server"`` mode. In
+            ``"browser"`` mode it must reach the server on ``port``, for
+            example through a tunnel; to use another web application, use
+            ``"server"`` mode and paste the address it lands on.
         timeout: Seconds to wait for the browser in ``"browser"`` mode.
         open_url: Opens a URL in a browser.
         show: Shows a line to the developer.
@@ -54,20 +62,25 @@ def login(
     Raises:
         LoginError: If the Login does not finish.
         CredentialsError: If Credentials are missing.
+        ValueError: If ``mode`` or ``redirect_uri`` is not allowed.
     """
     if mode not in ("browser", "server"):
         raise ValueError('mode must be "browser" or "server"')
+    if redirect_uri is not None and not redirect_uri.startswith(
+        ("http://", "https://")
+    ):
+        raise ValueError("redirect_uri must start with http:// or https://")
     credentials = credentials or load_credentials(client_id, client_secret, project_id)
     state = secrets.token_urlsafe(16)
 
     if mode == "server":
-        redirect_uri = SERVER_REDIRECT_URI
+        redirect_uri = redirect_uri or SERVER_REDIRECT_URI
         show("Open this link on any device and approve access:")
         show(authorization_url(credentials, redirect_uri, state))
-        address = ask("Then paste the address of the google.com page here: ")
+        address = ask("Then paste the address of the page you land on here: ")
     else:
         with RedirectReceiver(port) as receiver:
-            redirect_uri = receiver.redirect_uri
+            redirect_uri = redirect_uri or receiver.redirect_uri
             url = authorization_url(credentials, redirect_uri, state)
             show(f"Opening Google login. If no browser opens, visit:\n{url}")
             open_url(url)
