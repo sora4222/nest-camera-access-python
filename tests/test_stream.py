@@ -8,7 +8,7 @@ from datetime import UTC, datetime, timedelta
 import numpy as np
 import pytest
 
-from googlenestcam.errors import StreamError
+from googlenestcam.errors import CameraOffError, StreamError
 from tests.fake_google import COLOUR, HEIGHT, WIDTH
 
 
@@ -126,3 +126,15 @@ def test_unknown_frame_mode_is_refused(camera) -> None:
     """A typo in ``frames`` gives a clear error."""
     with pytest.raises(ValueError, match="frames"):
         camera.stream(frames="every")
+
+
+def test_camera_turned_off_gives_camera_off_error(camera, google) -> None:
+    """Google's "not available for streaming" becomes a CameraOffError."""
+    google.refuse_stream = "The camera is not available for streaming."
+    with pytest.raises(CameraOffError, match="Google Home app"), camera.stream():
+        pass
+
+
+def test_camera_off_error_is_a_stream_error() -> None:
+    """Code that catches StreamError also catches CameraOffError."""
+    assert issubclass(CameraOffError, StreamError)
