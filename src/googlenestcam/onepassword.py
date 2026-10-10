@@ -7,6 +7,7 @@ Needs the ``googlenestcam[onepassword]`` extra. Every failure becomes a
 import asyncio
 import os
 from concurrent.futures import ThreadPoolExecutor
+from importlib.metadata import version
 
 from googlenestcam.errors import OnePasswordError
 
@@ -24,7 +25,7 @@ def resolve_reference(reference: str) -> str:
     if not service_account_token:
         raise OnePasswordError(f"Set {SERVICE_ACCOUNT_ENV} to read {reference}")
     try:
-        from onepassword.client import Client
+        from onepassword import Client
     except ImportError as error:
         raise OnePasswordError(
             "Install googlenestcam[onepassword] to read op:// references"
@@ -34,7 +35,7 @@ def resolve_reference(reference: str) -> str:
         client = await Client.authenticate(
             auth=service_account_token,
             integration_name="googlenestcam",
-            integration_version="0.1.0",
+            integration_version=version("googlenestcam"),
         )
         return await client.secrets.resolve(reference)
 

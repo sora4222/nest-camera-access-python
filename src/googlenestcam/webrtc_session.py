@@ -5,7 +5,6 @@ extends the session before it expires, and stops it at Google when closed.
 """
 
 import asyncio
-import re
 from collections.abc import Awaitable, Callable, Coroutine
 from contextlib import suppress
 from datetime import UTC, datetime
@@ -39,9 +38,8 @@ def refused_error(error: GoogleApiError) -> StreamError:
 
 
 def parse_google_time(value: str) -> datetime:
-    """Parse Google's RFC 3339 time, which may have more than 6 decimals."""
-    value = re.sub(r"(\.\d{6})\d+", r"\1", value)
-    return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    """Parse Google's RFC 3339 time; decimals past microseconds are cut off."""
+    return datetime.fromisoformat(value)
 
 
 def _rgb(frame: VideoFrame, size: Size | None) -> Image:

@@ -12,7 +12,8 @@ from googlenestcam.oauth import (
     authorization_url,
     code_from_address,
     exchange_code,
-    refresh_access_token,
+    read_access_token,
+    refresh_request,
 )
 
 CREDS = Credentials("client-id", "client-secret", "project")
@@ -99,26 +100,28 @@ def test_exchange_code_without_refresh_token() -> None:
         exchange_code(CREDS, "abc", "https://www.google.com", _client(handler))
 
 
-async def test_refresh_access_token() -> None:
-    """A refresh token gives a short-lived access token and its expiry."""
+def test_refresh_request() -> None:
+    """The refresh request swaps the Token at Google's token address."""
+    request = refresh_request(CREDS, "r")
+    assert request.method == "POST"
+    assert str(request.url) == "https://oauth2.googleapis.com/token"
+    form = parse_qs(request.content.decode())
+    assert form["refresh_token"] == ["r"]
+    assert form["grant_type"] == ["refresh_token"]
+    assert form["client_id"] == ["client-id"]
 
-    def handler(request: httpx.Request) -> httpx.Response:
-        assert parse_qs(request.content.decode())["refresh_token"] == ["r"]
-        return httpx.Response(200, json={"access_token": "a", "expires_in": 3599})
 
-    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
-        token = await refresh_access_token(CREDS, "r", client)
+def test_read_access_token() -> None:
+    """Google's reply gives a short-lived access token and its expiry."""
+    response = httpx.Response(200, json={"access_token": "a", "expires_in": 3599})
+    token = read_access_token(response)
     assert token.value == "a"
     expected = datetime.now(UTC) + timedelta(seconds=3599)
     assert abs((token.expires_at - expected).total_seconds()) < 5
 
 
-async def test_revoked_refresh_token_says_login_again() -> None:
+def test_revoked_refresh_token_says_login_again() -> None:
     """A revoked Token tells the developer to log in again."""
-
-    def handler(_: httpx.Request) -> httpx.Response:
-        return httpx.Response(400, json={"error": "invalid_grant"})
-
-    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
-        with pytest.raises(TokenError, match="login"):
-            await refresh_access_token(CREDS, "r", client)
+    response = httpx.Response(400, json={"error": "invalid_grant"})
+    with pytest.raises(TokenError, match="login"):
+        read_access_token(response)

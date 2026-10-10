@@ -1,4 +1,7 @@
-"""Calls to Google's Smart Device Management (SDM) API."""
+"""Calls to Google's Smart Device Management (SDM) API.
+
+The client must use ``base_url=API_URL`` and ``auth=GoogleAuth(...)``.
+"""
 
 from typing import Any
 
@@ -20,7 +23,7 @@ def _raise_for_error(response: httpx.Response) -> None:
 
 
 async def list_devices(
-    client: httpx.AsyncClient, access_token: str, project_id: str
+    client: httpx.AsyncClient, project_id: str
 ) -> list[dict[str, Any]]:
     """Return every device on the account as Google describes it.
 
@@ -30,11 +33,7 @@ async def list_devices(
     devices: list[dict[str, Any]] = []
     params: dict[str, str] = {}
     while True:
-        response = await client.get(
-            f"{API_URL}/enterprises/{project_id}/devices",
-            headers={"Authorization": f"Bearer {access_token}"},
-            params=params,
-        )
+        response = await client.get(f"enterprises/{project_id}/devices", params=params)
         _raise_for_error(response)
         body = response.json()
         devices.extend(body.get("devices", []))
@@ -45,7 +44,6 @@ async def list_devices(
 
 async def execute_command(
     client: httpx.AsyncClient,
-    access_token: str,
     device_id: str,
     command: str,
     params: dict[str, Any],
@@ -54,7 +52,6 @@ async def execute_command(
 
     Args:
         client: HTTP client to use.
-        access_token: A valid access token.
         device_id: Google's full device ID (``enterprises/.../devices/...``).
         command: Full command name, like
             ``sdm.devices.commands.CameraLiveStream.GenerateWebRtcStream``.
@@ -64,9 +61,7 @@ async def execute_command(
         GoogleApiError: If Google refuses the command.
     """
     response = await client.post(
-        f"{API_URL}/{device_id}:executeCommand",
-        headers={"Authorization": f"Bearer {access_token}"},
-        json={"command": command, "params": params},
+        f"{device_id}:executeCommand", json={"command": command, "params": params}
     )
     _raise_for_error(response)
     return response.json().get("results", {})

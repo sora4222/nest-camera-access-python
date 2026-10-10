@@ -93,15 +93,10 @@ def exchange_code(
     return refresh_token
 
 
-async def refresh_access_token(
-    credentials: Credentials, refresh_token: str, client: httpx.AsyncClient
-) -> AccessToken:
-    """Swap the Token for a short-lived access token.
-
-    Raises:
-        TokenError: If Google refuses the Token.
-    """
-    response = await client.post(
+def refresh_request(credentials: Credentials, refresh_token: str) -> httpx.Request:
+    """Return the request that swaps the Token for a short-lived access token."""
+    return httpx.Request(
+        "POST",
         TOKEN_URL,
         data={
             "client_id": credentials.client_id,
@@ -110,6 +105,14 @@ async def refresh_access_token(
             "grant_type": "refresh_token",
         },
     )
+
+
+def read_access_token(response: httpx.Response) -> AccessToken:
+    """Return the access token from Google's reply to ``refresh_request``.
+
+    Raises:
+        TokenError: If Google refused the Token.
+    """
     if response.is_error:
         raise TokenError(
             f"Google refused the Token ({_google_error(response)}); "
