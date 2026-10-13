@@ -22,6 +22,7 @@ notebooks = [
     "matplotlib>=3.11.2",
     "opencv-python-headless>=5.0.0.93",
     "pillow>=12.3.0",
+    "ultralytics>=8.4.174",
 ]
 
 [build-system]
@@ -60,3 +61,8 @@ exclude = [".claude"]
 [tool.ty.analysis]
 # Notebooks use these if you install them; they are in no extra.
 allowed-unresolved-imports = ["torch", "tensorflow", "whisper"]
+
+[[tool.ty.overrides]]
+# Ultralytics says a model call may give Tensors or nothing, but it gives Results.
+include = ["notebooks/08-yolo.ipynb"]
+rules = { not-subscriptable = "ignore", unresolved-attribute = "ignore", not-iterable = "ignore" }
